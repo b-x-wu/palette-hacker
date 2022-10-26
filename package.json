@@ -1,0 +1,35 @@
+{
+  "name": "palette-hacker",
+  "version": "1.0.0",
+  "description": "Final project for CSCI-UA.0467 Applied Internet Technology",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "tsc && nodemon dist/app.js",
+    "lint": "eslint . --ext .ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nyu-csci-ua-0467-001-002-fall-2022/final-project-bxw201.git"
+  },
+  "author": "Bruce Wu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nyu-csci-ua-0467-001-002-fall-2022/final-project-bxw201/issues"
+  },
+  "homepage": "https://github.com/nyu-csci-ua-0467-001-002-fall-2022/final-project-bxw201#readme",
+  "devDependencies": {
+    "@tsconfig/node18": "^1.0.1",
+    "@types/express": "^4.17.14",
+    "@typescript-eslint/eslint-plugin": "^5.41.0",
+    "@typescript-eslint/parser": "^5.41.0",
+    "eslint": "^8.26.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
