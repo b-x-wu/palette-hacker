@@ -63,19 +63,33 @@ An Example Palette:
 
 ## Wireframes
 
-(__TODO__: wireframes for all of the pages on your site; they can be as simple as photos of drawings or you can use a tool like Balsamiq, Omnigraffle, etc.)
+/ - page to modify the current palette
 
-/list/create - page for creating a new shopping list
+![index](./documentation/main.png)
 
-![list create](documentation/list-create.png)
+/\<domain\> - page displaying all the palettes published for this domain
 
-/list - page for showing all shopping lists
+![palettes available for website](./documentation/website_palettes.png)
 
-![list](documentation/list.png)
+/login - page to log in
 
-/list/slug - page for showing specific shopping list
+![login](./documentation/login.png)
 
-![list](documentation/list-slug.png)
+/register - page to register a new user
+
+![register](./documentation/register.png)
+
+/ (logged in) - page to modify the current palette for currently logged in users
+
+![index logged in](./documentation/main_registered.png)
+
+/palettes - a page to view the currently logged in user's palettes
+
+![your palettes](./documentation/your_palettes.png)
+
+/palettes/\<palette_id\>/update - page to update the currently selected palette
+
+![update palette](./documentation/update_palette.png)
 
 ## Site map
 
@@ -112,7 +126,7 @@ Here's a [complex example from wikipedia](https://upload.wikimedia.org/wikipedia
   * Using TypeScript to try my best to avoid `undefined` or `null` type errors.
   * I have some experience with TypeScript with React.
 
-## [Link to Initial Main Project File](app.mjs) 
+## [Link to Initial Main Project File](app.mjs)
 
 (__TODO__: create a skeleton Express application with a package.json, app.mjs, views folder, etc. ... and link to your initial app.mjs)
 
@@ -122,4 +136,3 @@ Here's a [complex example from wikipedia](https://upload.wikimedia.org/wikipedia
 
 1. [passport.js authentication docs](http://passportjs.org/docs) - (add link to source code that was based on this)
 2. [tutorial on vue.js](https://vuejs.org/v2/guide/) - (add link to source code that was based on this)
-
