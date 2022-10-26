@@ -59,9 +59,7 @@ An Example Palette:
 }
 ```
 
-## [Link to Commented First Draft Schema](db.mjs) 
-
-(__TODO__: create a first draft of your Schemas in db.mjs and link to it)
+## [Link to Commented First Draft Schema](./src/db.ts)
 
 ## Wireframes
 
