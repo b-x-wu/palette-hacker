@@ -126,13 +126,8 @@ Here's a [complex example from wikipedia](https://upload.wikimedia.org/wikipedia
   * Using TypeScript to try my best to avoid `undefined` or `null` type errors.
   * I have some experience with TypeScript with React.
 
-## [Link to Initial Main Project File](app.mjs)
-
-(__TODO__: create a skeleton Express application with a package.json, app.mjs, views folder, etc. ... and link to your initial app.mjs)
+## [Link to Initial Main Project File](./src/app.ts)
 
 ## Annotations / References Used
 
-(__TODO__: list any tutorials/references/etc. that you've based your code off of)
-
-1. [passport.js authentication docs](http://passportjs.org/docs) - (add link to source code that was based on this)
-2. [tutorial on vue.js](https://vuejs.org/v2/guide/) - (add link to source code that was based on this)
+1. [How To Set Up a Node Project With Typescript - Digital Ocean](https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript))
