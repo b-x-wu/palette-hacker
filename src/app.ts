@@ -5,7 +5,7 @@ import express, { Application, Request, Response } from 'express';
 const app: Application = express();
 // const __filename: string = fileURLToPath(import.meta.url);
 // const __dirname: string = path.dirname(__filename);
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');

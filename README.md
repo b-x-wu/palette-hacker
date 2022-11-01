@@ -128,4 +128,5 @@ An Example Palette:
 
 ## Annotations / References Used
 
-1. [How To Set Up a Node Project With Typescript - Digital Ocean](https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript))
+1. [How To Set Up a Node Project With Typescript - Digital Ocean](https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript)
+2. [Setting up React + TypeScript app from scratch without create-react-app - Aleksei Berezkin](https://dev.to/alekseiberezkin/setting-up-react-typescript-app-without-create-react-app-oph)
