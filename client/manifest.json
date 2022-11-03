@@ -2,7 +2,25 @@
     "manifest_version": 3,
     "name": "Palette Hacker",
     "version": "0.0.0",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "tabs"
+    ],
+    "background": {
+        "service_worker": "scripts/background.js"
+    },
     "action": {
         "default_popup": "index.html"
-    }
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "scripts/content.js"
+            ]
+        }
+    ]
 }
