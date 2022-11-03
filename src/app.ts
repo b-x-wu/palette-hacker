@@ -1,5 +1,5 @@
 import express, { Application, Request, Response } from 'express';
-// import path from 'path'
+// import path from 'path';
 // import { fileURLToPath } from 'url';
 
 const app: Application = express();
