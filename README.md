@@ -126,7 +126,17 @@ An Example Palette:
 
 ## [Link to Initial Main Project File](./src/app.ts)
 
+## Considerations
+
+### Should traversal through the DOM tree give uniquely identifying query selectors?
+
+If we want uniquely identifying query selectors, we could just use `nth-child` for everything. However, semantically these selectors are meaningless (and also probably don't need to be stored explicitly as a query selector). This method means that any change in the ordering of the HTML of the page completely changes the way the palette affects the page.
+
+If we instead use tags, classes, and ids in the query selector, we aren't guaranteed that the selectors are uniquely selecting (that is using `document.querySelectorAll` may potentitially give back more than one element). As such, we are also not guaranteed that the selectors themselves are unique (that is we may have more than one of the same query selector being stored). This takes up more than the necssary amount of time in the database, and can remedied by checking if the query selector already exists, though that operation would make DOM traversal take magnitudes longer.
+
+In the end, we choose to go with non-unique tags, in order to prevent massive changes to how the palette affects the page if the page is changed at all. We will not worry about the non-unique query selectors being stored in the database since at most, the non-unique selectors are capped by the number DOM elements on the page which we were already expecting to store.
+
 ## Annotations / References Used
 
 1. [How To Set Up a Node Project With Typescript - Digital Ocean](https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript)
-2. [Setting up React + TypeScript app from scratch without create-react-app - Aleksei Berezkin](https://dev.to/alekseiberezkin/setting-up-react-typescript-app-without-create-react-app-oph)
+2. [Reading time - Chrome Developers](https://developer.chrome.com/docs/extensions/mv3/getstarted/tut-reading-time/)
