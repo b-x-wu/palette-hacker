@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from 'express';
+import './db';
 // import path from 'path';
 // import { fileURLToPath } from 'url';
 
@@ -11,4 +12,4 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');
 });
 
-app.listen(port, () => console.log(`Express is listening at http://localhost:${port}`));
+app.listen(port, () => console.log(`⚡ Express is listening at http://localhost:${port}⚡`));

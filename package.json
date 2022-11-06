@@ -4,7 +4,7 @@
   "description": "Final project for CSCI-UA.0467 Applied Internet Technology",
   "main": "dist/app.js",
   "scripts": {
-    "start": "tsc && nodemon dist/app.js",
+    "start": "nodemon",
     "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -30,6 +30,7 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "mongoose": "^6.7.0"
   }

@@ -18,6 +18,22 @@
     "plugins": [
         "@typescript-eslint"
     ],
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ],
+                "moduleDirectory": [
+                    "node_modules",
+                    "src"
+                ]
+            }
+        }
+    },
     "rules": {
         "linebreak-style": [
             "error",
@@ -33,6 +49,19 @@
                     ".ts",
                     ".tsx"
                 ]
+            }
+        ],
+        "no-plusplus": [
+            2,
+            {
+                "allowForLoopAfterthoughts": true
+            }
+        ],
+        "import/extensions": [
+            "error",
+            "ignorePackages",
+            {
+                "ts": "never"
             }
         ]
     }
