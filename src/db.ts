@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const { Schema, Types } = mongoose;
 
@@ -23,4 +26,8 @@ const Palette = new Schema({
     property: String,
     color: String,
   }],
+});
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1/pallete_hacker', (err) => {
+  console.log(err || 'Connected to MongoDB Atlas!');
 });
