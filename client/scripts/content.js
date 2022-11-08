@@ -90,7 +90,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           selector,
           attribute,
         };
-        if (Object.getOwnPropertyNames(colorInfo).includes(color)) {
+        if (Object.hasOwn(colorInfo, color)) {
           colorInfo[color].push(styleInfo);
         } else {
           colorInfo[color] = [styleInfo];

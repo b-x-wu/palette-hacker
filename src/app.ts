@@ -12,8 +12,8 @@ const port = process.env.PORT || 3001;
 
 const User = mongoose.model('User');
 
-// app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+// TODO: figure out what the max size should actually be
+app.use(express.json({ limit: '50mb' }));
 
 // logging middleware
 app.use((req, res, next) => {
@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  if (!Object.getOwnPropertyNames(req.body).includes('username')) {
+  if (!Object.hasOwn(req.body, 'username')) {
     res.json({
       status: 'fail',
       data: {
@@ -41,7 +41,7 @@ app.post('/register', (req, res) => {
     });
     return;
   }
-  if (!Object.getOwnPropertyNames(req.body).includes('password')) {
+  if (!Object.hasOwn(req.body, 'password')) {
     res.json({
       status: 'fail',
       data: {
@@ -99,6 +99,22 @@ app.post('/register', (req, res) => {
         reason: 'Username already exists.',
       },
     });
+  });
+});
+
+app.post('/add_palette', (req, res) => {
+  if (!Object.hasOwn(req.body, 'palette')) {
+    res.json({
+      status: 'fail',
+      message: 'Request body missing palette',
+    });
+    return;
+  }
+  const { palette } = req.body;
+  console.log(JSON.stringify(palette, null, 2));
+  res.json({
+    status: 'success',
+    data: null,
   });
 });
 

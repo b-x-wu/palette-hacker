@@ -1,3 +1,4 @@
+const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
 const getPaletteButton = document.querySelector('#get-palette');
 const display = document.querySelector('#display');
 const swatchContainer = document.querySelector('#swatches');
@@ -24,7 +25,7 @@ const rgbaToHex = (rgba) => {
  * @param {any} components the list of selectors/attributes of elements being affected
  * @param {any[]} palette the current palette to be modifying. likely the abridged one
  */
-const handleColorInput = (e, idx, components) => {
+const handleColorInput = (e, components) => {
   e.preventDefault();
   // send a message to content.js with component information
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -41,6 +42,61 @@ const handleColorInput = (e, idx, components) => {
       console.log(response);
     });
   });
+};
+
+const handleSubmitPalette = (e) => {
+  e.preventDefault();
+  // get the palette again
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    // prepare message
+    const message = {
+      author: 'popup',
+      request: 'getDOM',
+    };
+
+    // retrieving the palette from content.js
+    chrome.tabs.sendMessage(tabs[0].id, message, async (chromeResponse) => {
+      if (chromeResponse.status === 'success') {
+        const { palette } = chromeResponse.data;
+
+        // send the palette to api
+        const rawAPIResponse = await fetch(`${baseEndpoint}/add_palette`, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ palette }),
+        });
+        const apiResponse = await rawAPIResponse.json();
+
+        // send message out to user
+        if (apiResponse.status === 'success') {
+          display.textContent = 'Successfully submitted palette.';
+          console.log(apiResponse.data);
+        } else if (apiResponse.status === 'error') {
+          display.textContent = 'Error. View console for more information.';
+          console.log(apiResponse.message);
+        }
+      } else {
+        display.textContent = 'Error. View console for more information.';
+        console.log(chromeResponse.message);
+      }
+    });
+  });
+  console.log('submitting palette');
+  // body should be of the form
+  // {
+  //   palette: [
+  //     {
+  //       color: String,
+  //       components: [{
+  //         selector: String,
+  //         attribute: String,
+  //       }]
+  //     }
+  //   ]
+  // }
 };
 
 getPaletteButton.addEventListener('click', () => {
@@ -70,16 +126,30 @@ getPaletteButton.addEventListener('click', () => {
         console.log(palette);
 
         const abridgedPalette = palette.slice(0, 10);
-        abridgedPalette.forEach((color, idx) => {
+        abridgedPalette.forEach((color) => {
           const swatch = document.createElement('input');
           swatch.type = 'color';
           swatch.value = rgbaToHex(color.color);
-          swatch.addEventListener('input', (e) => handleColorInput(e, idx, color.components));
+          swatch.addEventListener('input', (e) => handleColorInput(e, color.components));
           swatchContainer.appendChild(swatch);
         });
+
+        // create form submitting elemenets
+        // TODO: can we do this with a template? or unhidden div?
+        const paletteNameInput = document.createElement('input');
+        paletteNameInput.type = 'text';
+        paletteNameInput.id = 'palette-name';
+        paletteNameInput.placeholder = 'Palette Name';
+        document.body.appendChild(paletteNameInput);
+
+        const submitPaletteButton = document.createElement('button');
+        submitPaletteButton.id = 'submit-palette';
+        submitPaletteButton.textContent = 'Submit Palette';
+        submitPaletteButton.addEventListener('click', handleSubmitPalette);
+        document.body.appendChild(submitPaletteButton);
       } else {
         display.textContent = 'Error. View console for more information.';
-        console.log(response.data);
+        console.log(response.message);
       }
     });
   });
