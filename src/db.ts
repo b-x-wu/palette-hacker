@@ -12,14 +12,9 @@ const UserSchema = new Schema({
   palettes: [Types.ObjectId],
 });
 
-const WebsiteSchema = new Schema({
-  domain: String,
-  palettes: [Types.ObjectId],
-});
-
 const PaletteSchema = new Schema({
   user: Types.ObjectId,
-  website: Types.ObjectId,
+  website: String,
   name: String,
   palette: [{
     color: String,
@@ -31,8 +26,7 @@ const PaletteSchema = new Schema({
 });
 
 mongoose.model('User', UserSchema);
-mongoose.model('Website', WebsiteSchema);
-mongoose.model('Palettes', PaletteSchema);
+mongoose.model('Palette', PaletteSchema);
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1/pallete_hacker', (err) => {
   console.log(err || '✅ Connected to MongoDB Atlas!');

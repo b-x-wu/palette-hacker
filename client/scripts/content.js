@@ -81,19 +81,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // TODO: figure out what to do about alpha value
     const colorInfo = {};
     iterateThroughDOM((node, selector) => {
-      console.log(selector);
-      console.log(document.querySelector(selector));
+      // for each node in the dom, either add it to an
+      // existing color or create a new color and add itself to it
       const style = getComputedStyle(node);
       colorAttributes.forEach((attribute) => {
         const color = style.getPropertyValue(attribute);
-        const styleInfo = {
+        const component = {
           selector,
           attribute,
         };
         if (Object.hasOwn(colorInfo, color)) {
-          colorInfo[color].push(styleInfo);
+          colorInfo[color].push(component);
         } else {
-          colorInfo[color] = [styleInfo];
+          colorInfo[color] = [component];
         }
       });
     });
@@ -106,6 +106,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const components = Array.from(
         colorInfo[colors[i]].reduce((curSet, e) => curSet.add(JSON.stringify(e)), new Set()),
       ).map((ele) => JSON.parse(ele));
+      // add new color and unique components to palette
       palette.push({
         color: colors[i],
         components,
@@ -115,7 +116,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('returning DOM');
     const response = {
       status: 'success',
-      data: { palette },
+      data: {
+        palette,
+        url: window.location.href,
+      },
     };
     // data: {
     //   palette: [
@@ -146,6 +150,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         data: null,
       };
     } catch (e) {
+      // catch any potential errors and respond with them
       response = {
         status: 'error',
         message: e.message,

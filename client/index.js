@@ -46,6 +46,7 @@ const handleColorInput = (e, components) => {
 
 const handleSubmitPalette = (e) => {
   e.preventDefault();
+
   // get the palette again
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     // prepare message
@@ -53,6 +54,10 @@ const handleSubmitPalette = (e) => {
       author: 'popup',
       request: 'getDOM',
     };
+
+    // get name and website
+    const paletteName = document.querySelector('#palette-name').value;
+    const paletteWebsite = document.querySelector('#palette-website').value;
 
     // retrieving the palette from content.js
     chrome.tabs.sendMessage(tabs[0].id, message, async (chromeResponse) => {
@@ -66,7 +71,11 @@ const handleSubmitPalette = (e) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ palette }),
+          body: JSON.stringify({
+            palette,
+            name: paletteName,
+            website: paletteWebsite,
+          }),
         });
         const apiResponse = await rawAPIResponse.json();
 
@@ -119,10 +128,11 @@ getPaletteButton.addEventListener('click', () => {
         display.textContent = 'Got DOM. View data in console.';
         // display the color palette out to the user
         // we probably don't want to display all the colors, maybe the most popular ones
-        const { palette } = response.data;
+        const { palette, url } = response.data;
         palette.sort((color1, color2) => color2.components.length - color1.components.length);
         // TODO: sorting by the number of components often will not give the components that cover
         //       the majority of the screen. is there a better way to sort?
+        // TODO: how much of the palette do we actually want to save? right now it's all of it
         console.log(palette);
 
         const abridgedPalette = palette.slice(0, 10);
@@ -141,6 +151,13 @@ getPaletteButton.addEventListener('click', () => {
         paletteNameInput.id = 'palette-name';
         paletteNameInput.placeholder = 'Palette Name';
         document.body.appendChild(paletteNameInput);
+
+        const paletteWebsiteInput = document.createElement('input');
+        paletteWebsiteInput.type = 'text';
+        paletteWebsiteInput.id = 'palette-website';
+        paletteWebsiteInput.placeholder = 'Website URL';
+        paletteWebsiteInput.value = url;
+        document.body.appendChild(paletteWebsiteInput);
 
         const submitPaletteButton = document.createElement('button');
         submitPaletteButton.id = 'submit-palette';

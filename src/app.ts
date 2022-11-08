@@ -11,6 +11,7 @@ const app: Application = express();
 const port = process.env.PORT || 3001;
 
 const User = mongoose.model('User');
+const Palette = mongoose.model('Palette');
 
 // TODO: figure out what the max size should actually be
 app.use(express.json({ limit: '50mb' }));
@@ -22,7 +23,7 @@ app.use((req, res, next) => {
     console.log(`Query: ${JSON.stringify(req.query, null, 2)}`);
   }
   if (req.body) {
-    console.log(`Body: ${JSON.stringify(req.body, null, 2)}`);
+    console.log(`Body: ${JSON.stringify(req.body, null, 2).substring(0, 1000)}`);
   }
   next();
 });
@@ -68,6 +69,7 @@ app.post('/register', (req, res) => {
 
       return newUser.save();
     }).then(() => {
+      console.log(`New user ${username} created and saved.`);
       res.json({
         status: 'success',
         data: {
@@ -110,11 +112,29 @@ app.post('/add_palette', (req, res) => {
     });
     return;
   }
-  const { palette } = req.body;
-  console.log(JSON.stringify(palette, null, 2));
-  res.json({
-    status: 'success',
-    data: null,
+
+  // get website attributes
+  const { name, website, palette } = req.body;
+
+  // create and save palette document
+  const newPalette = new Palette({
+    name,
+    website,
+    palette,
+  });
+
+  newPalette.save().then(() => {
+    console.log(`New palette ${name} created and saved.`);
+    res.json({
+      status: 'success',
+      data: null,
+    });
+  }, (err) => {
+    console.log(err.message);
+    res.json({
+      status: 'error',
+      message: 'Unknown database error.',
+    });
   });
 });
 
