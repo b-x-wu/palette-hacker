@@ -5,29 +5,35 @@ dotenv.config();
 
 const { Schema, Types } = mongoose;
 
-const User = new Schema({
+// TODO: make fields required
+const UserSchema = new Schema({
   username: String,
   hash: String,
-  salt: String,
   palettes: [Types.ObjectId],
 });
 
-const Website = new Schema({
+const WebsiteSchema = new Schema({
   domain: String,
   palettes: [Types.ObjectId],
 });
 
-const Palette = new Schema({
+const PaletteSchema = new Schema({
   user: Types.ObjectId,
   website: Types.ObjectId,
   name: String,
-  swaps: [{
-    selector: String,
-    property: String,
+  palette: [{
     color: String,
+    components: [{
+      selector: String,
+      attribute: String,
+    }],
   }],
 });
 
+mongoose.model('User', UserSchema);
+mongoose.model('Website', WebsiteSchema);
+mongoose.model('Palettes', PaletteSchema);
+
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1/pallete_hacker', (err) => {
-  console.log(err || 'Connected to MongoDB Atlas!');
+  console.log(err || '✅ Connected to MongoDB Atlas!');
 });
