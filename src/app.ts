@@ -24,7 +24,6 @@ app.use((req, res, next) => {
   if (req.body) {
     console.log(`Body: ${JSON.stringify(req.body, null, 2)}`);
   }
-
   next();
 });
 

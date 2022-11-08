@@ -21,11 +21,27 @@ function iterateThroughDOMRec(node, selector, cb) {
     const childId = child.id; // either the unique id or the empty string
     const childClasses = child.getAttribute('class'); // either null or space delimited classes
     const childTag = child.tagName;
-    const childSelector = `${childTag}${(childId ? `#${childId}` : '')}${childClasses ? `.${childClasses.replace(' ', '.')}` : ''}`;
+
+    // check for qualities we don't want
+    const childSelector = childTag
+                          + (childId ? `#${childId}` : '')
+                          + (childClasses ? `.${childClasses.trim().replace(/\s+/g, '.').replace(/:/g, '\\:')}` : '');
+    // TODO: https://edstem.org/us/courses/27587/discussion/2104836
 
     const newSelectors = selector.slice();
     newSelectors.push(childSelector);
-    iterateThroughDOMRec(child, newSelectors, cb);
+
+    try {
+      document.querySelector(newSelectors.join('>'));
+      iterateThroughDOMRec(child, newSelectors, cb);
+    } catch {
+      // we catch if the added selector made it an invalid selector
+      // for now, we don't do anything with it.
+      // I guess there's a lot of reasons why a query selector fails
+      // TODO: figure out some reasons for why query selectors fail
+      // current known reasons: colons, containers for google ad iframes
+      console.log(`Invalid query selector found: ${newSelectors.join('>')}`);
+    }
   }
 }
 
@@ -47,31 +63,65 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.author === 'popup' && message.request === 'getDOM') {
     // message from popup to send back the dom
-    // TODO: compile a palette from the DOM
+
+    const colorAttributes = [
+      'background-color',
+      'border-bottom-color',
+      'border-left-color',
+      'border-right-color',
+      'border-top-color',
+      'caret-color',
+      'color',
+      'column-rule-color',
+      'outline-color',
+      'text-decoration-color',
+    ];
 
     // iterate through all the elements of the DOM
-    const selectors = [];
+    // TODO: figure out what to do about alpha value
+    const colorInfo = {};
     iterateThroughDOM((node, selector) => {
-      // return the selectors
+      console.log(selector);
+      console.log(document.querySelector(selector));
       const style = getComputedStyle(node);
-      const { backgroundColor } = style;
-      selectors.push({
-        color: backgroundColor,
-        selector,
-        attribute: 'backgroundColor',
+      colorAttributes.forEach((attribute) => {
+        const color = style.getPropertyValue(attribute);
+        const styleInfo = {
+          selector,
+          attribute,
+        };
+        if (Object.getOwnPropertyNames(colorInfo).includes(color)) {
+          colorInfo[color].push(styleInfo);
+        } else {
+          colorInfo[color] = [styleInfo];
+        }
       });
     });
 
+    // transform into palette array
+    const colors = Object.getOwnPropertyNames(colorInfo);
+    const palette = [];
+    for (let i = 0; i < colors.length; i++) {
+      // get unique node/attribute properties
+      const components = Array.from(
+        colorInfo[colors[i]].reduce((curSet, e) => curSet.add(JSON.stringify(e)), new Set()),
+      ).map((ele) => JSON.parse(ele));
+      palette.push({
+        color: colors[i],
+        components,
+      });
+    }
+
     console.log('returning DOM');
     const response = {
-      status: 'OK',
-      data: { selectors },
+      status: 'success',
+      data: { palette },
     };
     // data: {
     //   palette: [
     //     {
     //       color: String,
-    //       nodeProperties: [
+    //       components: [
     //         {
     //           selector: String,
     //           attribute: String,
@@ -84,8 +134,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else {
     // unknown author or request
     const response = {
-      status: 'ERR',
-      data: 'Invalid author or request',
+      status: 'error',
+      message: 'Invalid author or request',
     };
     sendResponse(response);
   }

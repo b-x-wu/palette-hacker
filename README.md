@@ -140,3 +140,4 @@ In the end, we choose to go with non-unique tags, in order to prevent massive ch
 
 1. [How To Set Up a Node Project With Typescript - Digital Ocean](https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript)
 2. [Reading time - Chrome Developers](https://developer.chrome.com/docs/extensions/mv3/getstarted/tut-reading-time/)
+3. [Methods to get unique values from arrays in Javascript and their performance - Phi Bya](https://dev.to/phibya/methods-to-get-unique-values-from-arrays-in-javascript-and-their-performance-1da8)
