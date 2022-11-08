@@ -131,6 +131,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     //   ]
     // }
     sendResponse(response);
+  } else if (message.author === 'popup' && message.request === 'changeColor') {
+    // change the style of all the components to the new color
+    let response;
+    try {
+      message.data.components.forEach((component) => {
+        const elements = document.querySelectorAll(component.selector);
+        elements.forEach((element) => {
+          element.style.setProperty(component.attribute, message.data.newColor);
+        });
+      });
+      response = {
+        status: 'success',
+        data: null,
+      };
+    } catch (e) {
+      response = {
+        status: 'error',
+        message: e.message,
+      };
+    } finally {
+      sendResponse(response);
+    }
   } else {
     // unknown author or request
     const response = {
