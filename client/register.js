@@ -1,8 +1,10 @@
-const baseEndpoint = 'http://localhost:3001';
+// const baseEndpoint = 'http://localhost:3001';
+const baseEndpoint = 'https://palette-hacker.herokuapp.com';
 const submitButton = document.querySelector('#submit-registration');
 const failDisplay = document.querySelector('#fail-display');
 
 async function handleRegistrationSubmit() {
+  console.log('click!');
   const username = document.querySelector('#username').value;
   const password = document.querySelector('#password').value;
 
@@ -19,7 +21,7 @@ async function handleRegistrationSubmit() {
     }),
   });
   const response = await rawResponse.json();
-
+  console.log(response);
   // check response status
   if (response.status === 'success') {
     // do something on success

@@ -1,4 +1,5 @@
-const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
+// const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
+const baseEndpoint = 'https://palette-hacker.herokuapp.com';
 const getPaletteButton = document.querySelector('#get-palette');
 const successDisplay = document.querySelector('#success-display');
 const failDisplay = document.querySelector('#fail-display');
