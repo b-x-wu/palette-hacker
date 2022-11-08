@@ -2,10 +2,6 @@ import express, { Application } from 'express';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import './db';
-// import path from 'path';
-// import { fileURLToPath } from 'url';
-// const __filename: string = fileURLToPath(import.meta.url);
-// const __dirname: string = path.dirname(__filename);
 
 const app: Application = express();
 const port = process.env.PORT || 3001;
