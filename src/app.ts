@@ -12,7 +12,8 @@ const port = process.env.PORT || 3001;
 
 const User = mongoose.model('User');
 
-app.use(express.urlencoded({ extended: false }));
+// app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 // logging middleware
 app.use((req, res, next) => {
@@ -39,13 +40,16 @@ app.post('/register', (req, res) => {
         reason: 'No username provided.',
       },
     });
-  } else if (!Object.getOwnPropertyNames(req.body).includes('password')) {
+    return;
+  }
+  if (!Object.getOwnPropertyNames(req.body).includes('password')) {
     res.json({
       status: 'fail',
       data: {
         reason: 'No password provided.',
       },
     });
+    return;
   }
   const { username, password } = req.body;
 
