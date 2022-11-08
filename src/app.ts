@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
+import cors from 'cors';
 import './db';
 
 const app: Application = express();
@@ -11,6 +12,7 @@ const Palette = mongoose.model('Palette');
 
 // TODO: figure out what the max size should actually be
 app.use(express.json({ limit: '50mb' }));
+app.use(cors());
 
 // logging middleware
 app.use((req, res, next) => {
