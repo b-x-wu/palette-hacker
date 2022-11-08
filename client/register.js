@@ -1,5 +1,6 @@
 const baseEndpoint = 'http://localhost:3001';
 const submitButton = document.querySelector('#submit-registration');
+const failDisplay = document.querySelector('#fail-display');
 
 async function handleRegistrationSubmit() {
   const username = document.querySelector('#username').value;
@@ -25,11 +26,9 @@ async function handleRegistrationSubmit() {
     // TODO: redirect to home with some info about the user
   } else if (response.status === 'fail') {
     // display error message on fail/error
-    const fail = document.querySelector('#fail');
-    fail.textContent = response.data.reason;
+    failDisplay.textContent = response.data.reason;
   } else if (response.status === 'error') {
-    const error = document.querySelector('#error');
-    error.textContent = response.message;
+    failDisplay.textContent = response.message;
   }
 }
 

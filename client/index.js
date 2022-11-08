@@ -1,6 +1,7 @@
 const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
 const getPaletteButton = document.querySelector('#get-palette');
-const display = document.querySelector('#display');
+const successDisplay = document.querySelector('#success-display');
+const failDisplay = document.querySelector('#fail-display');
 const swatchContainer = document.querySelector('#swatches');
 
 /**
@@ -81,36 +82,23 @@ const handleSubmitPalette = (e) => {
 
         // send message out to user
         if (apiResponse.status === 'success') {
-          display.textContent = 'Successfully submitted palette.';
+          successDisplay.textContent = 'Successfully submitted palette.';
           console.log(apiResponse.data);
         } else if (apiResponse.status === 'error') {
-          display.textContent = 'Error. View console for more information.';
+          failDisplay.textContent = 'Error. View console for more information.';
           console.log(apiResponse.message);
         }
       } else {
-        display.textContent = 'Error. View console for more information.';
+        failDisplay.textContent = 'Error. View console for more information.';
         console.log(chromeResponse.message);
       }
     });
   });
-  console.log('submitting palette');
-  // body should be of the form
-  // {
-  //   palette: [
-  //     {
-  //       color: String,
-  //       components: [{
-  //         selector: String,
-  //         attribute: String,
-  //       }]
-  //     }
-  //   ]
-  // }
 };
 
 getPaletteButton.addEventListener('click', () => {
   // sanity check to show that button was clicked
-  display.textContent = 'loading';
+  successDisplay.textContent = 'loading';
 
   // send a message to content.js
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -125,7 +113,7 @@ getPaletteButton.addEventListener('click', () => {
     //       https://developer.chrome.com/docs/extensions/mv3/messaging/
     chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
       if (response.status === 'success') {
-        display.textContent = 'Got DOM. View data in console.';
+        successDisplay.textContent = 'Got DOM. View data in console.';
         // display the color palette out to the user
         // we probably don't want to display all the colors, maybe the most popular ones
         const { palette, url } = response.data;
@@ -133,7 +121,6 @@ getPaletteButton.addEventListener('click', () => {
         // TODO: sorting by the number of components often will not give the components that cover
         //       the majority of the screen. is there a better way to sort?
         // TODO: how much of the palette do we actually want to save? right now it's all of it
-        console.log(palette);
 
         const abridgedPalette = palette.slice(0, 10);
         abridgedPalette.forEach((color) => {
@@ -141,6 +128,7 @@ getPaletteButton.addEventListener('click', () => {
           swatch.type = 'color';
           swatch.value = rgbaToHex(color.color);
           swatch.addEventListener('input', (e) => handleColorInput(e, color.components));
+          // TODO: add a feature to flash the elements associated with a certain color on click
           swatchContainer.appendChild(swatch);
         });
 
@@ -165,11 +153,12 @@ getPaletteButton.addEventListener('click', () => {
         submitPaletteButton.addEventListener('click', handleSubmitPalette);
         document.body.appendChild(submitPaletteButton);
       } else {
-        display.textContent = 'Error. View console for more information.';
+        failDisplay.textContent = 'Error. View console for more information.';
         console.log(response.message);
       }
     });
   });
 });
 
-// when we want to send the newest palette to the db, just get the dom again
+// TODO: this typing is make me very very nervous...
+//       get typescript and webpack up and running
