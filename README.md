@@ -20,24 +20,10 @@ An Example User:
 ```javascript
 {
   username: "westingben",
-  salt: "ji23ojoighhff", // a password salt
   hash: "afu829rfids903rjaf0", // a password hash
   palettes: [ // an array of references to Palette documents
     ObjectId(1249008104),
     ObjectId(0514958129)
-  ]
-}
-```
-
-An Example Website:
-
-```javascript
-{
-  domain: "google.com",
-  palettes: [ // an array of references to Palette documents
-    ObjectId(1452345612),
-    ObjectId(0514958129),
-    ObjectId(1057461037)
   ]
 }
 ```
@@ -47,13 +33,17 @@ An Example Palette:
 ```javascript
 {
   user: ObjectId(1037141147), // a reference to a User document
-  website: ObjectId(0540159329), // a reference to a Website document
+  website: "https://samplewebsite.com",
   name: "Dark Mode",
-  swaps: [ // an array of embedded Swap documents
+  palette: [
     {
-      selector: ".panel",
-      property: "background-color",
-      color: "#a2f113"
+      color: "#124352",
+      components: [
+        {
+          selector: "body>DIV",
+          attribute: "background-color"
+        }
+      ]
     }
   ]
 }
