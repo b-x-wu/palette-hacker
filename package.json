@@ -4,7 +4,8 @@
   "description": "Final project for CSCI-UA.0467 Applied Internet Technology",
   "main": "dist/app.js",
   "scripts": {
-    "start": "nodemon",
+    "start": "node dist/app.js",
+    "dev": "nodemon",
     "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
