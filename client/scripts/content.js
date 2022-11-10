@@ -11,10 +11,7 @@ function iterateThroughDOMRec(node, selector, cb) {
   // iterate through element children
   // TODO: there are probably certain tags I want to filter out
   //       ie script, style, noscript, etc
-  const children = Array.prototype.filter.call(
-    node.childNodes,
-    (n) => n.nodeType === Node.ELEMENT_NODE,
-  );
+  const { children } = node;
   for (let i = 0, len = children.length; i < len; i++) {
     // get the tag, id (if it exists), and classes (if they exist)
     const child = children[i];
