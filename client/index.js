@@ -1,5 +1,5 @@
-// const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
-const baseEndpoint = 'https://palette-hacker.herokuapp.com';
+const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
+// const baseEndpoint = 'https://palette-hacker.herokuapp.com';
 const getPaletteButton = document.querySelector('#get-palette');
 const successDisplay = document.querySelector('#success-display');
 const failDisplay = document.querySelector('#fail-display');
@@ -60,6 +60,7 @@ const handleSubmitPalette = (e) => {
     // get name and website
     const paletteName = document.querySelector('#palette-name').value;
     const paletteWebsite = document.querySelector('#palette-website').value;
+    // TODO: figure out what we want for the website.
 
     // retrieving the palette from content.js
     chrome.tabs.sendMessage(tabs[0].id, message, async (chromeResponse) => {
@@ -118,6 +119,7 @@ getPaletteButton.addEventListener('click', () => {
         // display the color palette out to the user
         // we probably don't want to display all the colors, maybe the most popular ones
         const { palette, url } = response.data;
+        console.log(palette);
         palette.sort((color1, color2) => color2.components.length - color1.components.length);
         // TODO: sorting by the number of components often will not give the components that cover
         //       the majority of the screen. is there a better way to sort?
@@ -127,7 +129,8 @@ getPaletteButton.addEventListener('click', () => {
         abridgedPalette.forEach((color) => {
           const swatch = document.createElement('input');
           swatch.type = 'color';
-          swatch.value = rgbaToHex(color.color);
+          // swatch.value = rgbaToHex(color.color);
+          swatch.value = rgbaToHex(`rgb(${color.color.red}, ${color.color.green}, ${color.color.blue})`);
           swatch.addEventListener('input', (e) => handleColorInput(e, color.components));
           // TODO: add a feature to flash the elements associated with a certain color on click
           swatchContainer.appendChild(swatch);

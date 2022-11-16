@@ -17,7 +17,23 @@ const PaletteSchema = new Schema({
   website: String,
   name: String,
   palette: [{
-    color: String,
+    color: {
+      red: {
+        type: Number,
+        min: 0,
+        max: 255,
+      },
+      green: {
+        type: Number,
+        min: 0,
+        max: 255,
+      },
+      blue: {
+        type: Number,
+        min: 0,
+        max: 255,
+      },
+    },
     components: [{
       selector: String,
       attribute: String,

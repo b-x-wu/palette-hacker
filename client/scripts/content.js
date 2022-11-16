@@ -52,6 +52,41 @@ function iterateThroughDOM(cb) {
   iterateThroughDOMRec(document.body, ['body'], cb);
 }
 
+/**
+ * Converts color format from #RRGGBB (from the color input element) to rgba()
+ * @param {*} rrggbb the color in #RRGGBB format, returned from color input
+ * @param {*} alpha the opacity, between 0 and 1
+ * @returns rgba encoded version of the color described in rrggbb with opacity alpha
+ */
+function rrggbbToRgba(rrggbb, alpha) {
+  const redHex = rrggbb.slice(1, 3);
+  const greenHex = rrggbb.slice(3, 5);
+  const blueHex = rrggbb.slice(5, 7);
+  return `rgba(${parseInt(redHex, 16)}, ${parseInt(greenHex, 16)}, ${parseInt(blueHex, 16)}, ${alpha})`;
+}
+
+/**
+ * Applies a new color to the attribute of the element, preserving alpha
+ * @param {Element} element the element to apply the new color to
+ * @param {string} attribute the attribute of the element to apply the color to
+ * @param {string} colorCode the color code (in #RRGGBB) to set the attribute to
+ */
+function applyColorOnElement(element, attribute, colorCode) {
+  // get the alpha value of the element
+  const color = getComputedStyle(element).getPropertyValue(attribute);
+  if (color.includes('rgba')) {
+    const [, alpha] = color.match(/rgba\(\d+, \d+, \d+, (0?\.?\d+)\)/);
+    element.style.setProperty(attribute, rrggbbToRgba(colorCode, alpha));
+    return;
+  }
+  element.style.setProperty(attribute, colorCode);
+} // TODO: this doesn't work because there is no match because the alpha is a decimal with a dot
+
+function rgbaToCommaDelimittedRGB(rgba) {
+  const [, red, green, blue] = rgba.match(/rgba*\((\d+), (\d+), (\d+)(?:, \d*\.?\d*)?\)/);
+  return [red, green, blue].join(',');
+}
+
 // process messages received
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Message received in content.js');
@@ -82,7 +117,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // existing color or create a new color and add itself to it
       const style = getComputedStyle(node);
       colorAttributes.forEach((attribute) => {
-        const color = style.getPropertyValue(attribute);
+        const color = rgbaToCommaDelimittedRGB(style.getPropertyValue(attribute));
         const component = {
           selector,
           attribute,
@@ -104,8 +139,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         colorInfo[colors[i]].reduce((curSet, e) => curSet.add(JSON.stringify(e)), new Set()),
       ).map((ele) => JSON.parse(ele));
       // add new color and unique components to palette
+      const [redString, greenString, blueString] = colors[i].split(',');
       palette.push({
-        color: colors[i],
+        color: {
+          red: parseInt(redString, 10),
+          green: parseInt(greenString, 10),
+          blue: parseInt(blueString, 10),
+        },
         components,
       });
     }
@@ -118,19 +158,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         url: window.location.href,
       },
     };
-    // data: {
-    //   palette: [
-    //     {
-    //       color: String,
-    //       components: [
-    //         {
-    //           selector: String,
-    //           attribute: String,
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }
     sendResponse(response);
   } else if (message.author === 'popup' && message.request === 'changeColor') {
     // change the style of all the components to the new color
@@ -139,7 +166,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       message.data.components.forEach((component) => {
         const elements = document.querySelectorAll(component.selector);
         elements.forEach((element) => {
-          element.style.setProperty(component.attribute, message.data.newColor);
+          applyColorOnElement(element, component.attribute, message.data.newColor);
+          // element.style.setProperty(component.attribute, message.data.newColor);
         });
       });
       response = {
