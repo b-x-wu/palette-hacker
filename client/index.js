@@ -21,6 +21,15 @@ function rgbaToHex(rgba) {
 }
 
 /**
+ * Converts color object from backend to rgb representation used by front-end
+ * @param {Color} colorObj object representation of color as {red, green, blue}
+ * @returns the color in string representation rgb(R, G, B)
+ */
+function colorObjectToRGB(colorObj) {
+  return `rgb(${colorObj.red}, ${colorObj.green}, ${colorObj.blue})`;
+}
+
+/**
  * Clears the success response and displays a failure message in the relevant div
  * @param {string} message the failure message to display
  */
@@ -162,12 +171,20 @@ async function handleRetrieveWebsitePalettes() {
 
       if (fetchResponse.status === 200) {
         const { palettes } = fetchResponseBody.data;
+        const retrievedPalettesContainer = document.querySelector('#retrieved-palettes');
+        const retrievedPaletteTemplate = document.querySelector('#retrieved-palette-template');
         palettes.forEach((palette) => {
-          // TODO: sort out how to present palettes
-          const div = document.createElement('div');
-          div.classList.add('imported-palette');
-          div.textContent = `Name: ${palette.name}, Website: ${palette.website}, Relevance: ${palette.relevance}`;
-          document.body.appendChild(div);
+          const retrievedPalette = retrievedPaletteTemplate.content.cloneNode(true);
+          retrievedPalette.querySelector('.palette-name').textContent = palette.name;
+          retrievedPalette.querySelector('.palette-relevance').textContent = palette.relevance;
+          const palettePreview = retrievedPalette.querySelector('.palette-preview');
+          palette.palette.slice(0, 5).forEach((swatch) => {
+            const colorSquare = document.createElement('div');
+            colorSquare.classList.add('retrieved-palette-color-square');
+            colorSquare.style.backgroundColor = colorObjectToRGB(swatch.color);
+            palettePreview.appendChild(colorSquare);
+          });
+          retrievedPalettesContainer.appendChild(retrievedPalette);
         });
       } else if (fetchResponse.status === 400) {
         displayFailMessage(`Error retrieving palettes: ${fetchResponseBody.data.reason}`);

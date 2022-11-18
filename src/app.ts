@@ -162,7 +162,7 @@ app.get('/website_palettes', (req, res) => {
     website: {
       $regex: `^${(new URL(cleanUrl(req.query.website as string))).origin}.*$`,
     },
-  }) // TODO: i wish i could use $where here but the free tier doesn't allow that
+  })
     .then((docs) => {
       res.json({
         status: 'success',
