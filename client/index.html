@@ -7,12 +7,18 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
+    <script defer src="index.js"></script>
     <h1>Palette Hacker</h1>
-    <div id="success-display"></div>
-    <div id="fail-display"></div>
+    <div id="message-displays">
+        <div id="success-display"></div>
+        <div id="fail-display"></div>
+    </div>
     <div id="swatches"></div>
-    <a href="login.html">Login</a>
-    <a href="register.html">Register</a>
+    <form id="submit-palette-form">
+        <input type="text" id="palette-name" placeholder="Palette Name">
+        <button type="submit" id="submit-palette">Submit Palette</button>
+    </form>
+    <!-- <a href="login.html">Login</a> -->
+    <!-- <a href="register.html">Register</a> -->
 </body>
-<script src="index.js"></script>
 </html>

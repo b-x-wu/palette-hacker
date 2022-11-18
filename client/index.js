@@ -123,9 +123,9 @@ function handleSubmitPalette(e, url) {
   });
 }
 
-function handleGetPalette() {
-  // sanity check to show that button was clicked
-  displaySucessMessage('Loading...');
+async function handleGetPalette() {
+  // TODO: I don't know if this should count as a success message
+  displaySucessMessage('Loading palette for current website...');
 
   // send a message to content.js
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -143,7 +143,7 @@ function handleGetPalette() {
   });
 }
 
-function handlePageLoad() {
+async function handleRetrieveWebsitePalettes() {
   // get the url of the page
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const message = {
@@ -158,8 +158,10 @@ function handlePageLoad() {
         website: url,
       })}`);
 
+      const fetchResponseBody = await fetchResponse.json();
+
       if (fetchResponse.status === 200) {
-        const { palettes } = (await fetchResponse.json()).data;
+        const { palettes } = fetchResponseBody.data;
         palettes.forEach((palette) => {
           // TODO: sort out how to present palettes
           const div = document.createElement('div');
@@ -167,8 +169,11 @@ function handlePageLoad() {
           div.textContent = `Name: ${palette.name}, Website: ${palette.website}, Relevance: ${palette.relevance}`;
           document.body.appendChild(div);
         });
+      } else if (fetchResponse.status === 400) {
+        displayFailMessage(`Error retrieving palettes: ${fetchResponseBody.data.reason}`);
+      } else if (fetchResponse.status === 500) {
+        displayFailMessage(`Error retrieving palettes: ${fetchResponseBody.message}`);
       }
-      // TODO: handle 400 or 500 response
     } catch (e) {
       displayFailMessage(`Error retrieving palettes: ${e.message}`);
     }
@@ -202,19 +207,9 @@ function getPaletteMessageListener(response) {
       swatchContainer.appendChild(swatch);
     });
 
-    // create form submitting elemenets
-    // TODO: can we do this with a template? or unhidden div?
-    const paletteNameInput = document.createElement('input');
-    paletteNameInput.type = 'text';
-    paletteNameInput.id = 'palette-name';
-    paletteNameInput.placeholder = 'Palette Name';
-    document.body.appendChild(paletteNameInput);
-
-    const submitPaletteButton = document.createElement('button');
-    submitPaletteButton.id = 'submit-palette';
-    submitPaletteButton.textContent = 'Submit Palette';
-    submitPaletteButton.addEventListener('click', (e) => handleSubmitPalette(e, url));
-    document.body.appendChild(submitPaletteButton);
+    // show the form to submit palette
+    document.querySelector('#submit-palette-form').style.display = 'block';
+    document.querySelector('#submit-palette').addEventListener('click', (e) => handleSubmitPalette(e, url));
   } else {
     displayFailMessage(`Error: ${response.message}`);
   }
@@ -223,8 +218,9 @@ function getPaletteMessageListener(response) {
 // ------------------------ MAIN --------------------------------------
 
 function main() {
+  document.querySelector('#submit-palette-form').style.display = 'none';
+  handleRetrieveWebsitePalettes();
   handleGetPalette();
-  handlePageLoad();
 }
 
 document.addEventListener('DOMContentLoaded', main);
