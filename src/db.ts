@@ -1,18 +1,19 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import * as dotenv from 'dotenv';
+import { User, Palette } from './types';
 
 dotenv.config();
 
-const { Schema, Types } = mongoose;
+const { Schema } = mongoose;
 
 // TODO: make fields required
-const UserSchema = new Schema({
+const UserSchema = new Schema<User>({
   username: String,
   hash: String,
   palettes: [Types.ObjectId],
 });
 
-const PaletteSchema = new Schema({
+const PaletteSchema = new Schema<Palette>({
   user: Types.ObjectId,
   website: String,
   name: String,

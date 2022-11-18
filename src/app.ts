@@ -3,12 +3,18 @@ import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import './db';
+import { User, Palette } from './types';
 
 const app: Application = express();
 const port = process.env.PORT || 3001;
 
-const User = mongoose.model('User');
-const Palette = mongoose.model('Palette');
+const UserModel = mongoose.model<User>('User');
+const PaletteModel = mongoose.model<Palette>('Palette');
+
+// returns the url sans query params, fragment, or trailing slashes
+const cleanUrl = (url: string) => url.split('#')[0] // get everything before the hash if it exists
+  .split('?')[0] // get everything before the question mark if it exists
+  .replace(/\/+$/, ''); // strip of any backslashes
 
 // TODO: figure out what the max size should actually be
 app.use(express.json({ limit: '50mb' }));
@@ -52,14 +58,14 @@ app.post('/register', (req, res) => {
   const { username, password } = req.body;
 
   // check for repeat username
-  User.findOne({ username }).then((result) => {
+  UserModel.findOne({ username }).then((result) => {
     if (result) {
       throw new Error('Username already exists.');
     }
 
     bcrypt.hash(password, parseInt(process.env.HASH || '10', 10)).then((hash) => {
       // send new user to mongodb
-      const newUser = new User({
+      const newUser = new UserModel({
         username,
         hash,
         palettes: [],
@@ -115,9 +121,9 @@ app.post('/add_palette', (req, res) => {
   const { name, website, palette } = req.body;
 
   // create and save palette document
-  const newPalette = new Palette({
+  const newPalette = new PaletteModel({
     name,
-    website,
+    website: cleanUrl(website),
     palette,
   });
 
@@ -134,6 +140,35 @@ app.post('/add_palette', (req, res) => {
       message: 'Unknown database error.',
     });
   });
+});
+
+app.get('/website_palettes', (req, res) => {
+  // provides query params website or user
+  if (!req.query.website) {
+    res.json({
+      status: 'fail',
+      data: {
+        reason: 'No website provided',
+      },
+    });
+    return;
+  }
+
+  // query the database for the website
+  PaletteModel.find({ website: cleanUrl(req.query.website as string) })
+    .then(() => {
+      res.json({
+        status: 'success',
+        data: [],
+      });
+    })
+    .catch((err) => {
+      console.log(err.message);
+      res.json({
+        status: 'error',
+        message: 'Unknown database error.',
+      });
+    });
 });
 
 app.listen(port, () => console.log(`⚡ Express is listening at http://localhost:${port}⚡`));
