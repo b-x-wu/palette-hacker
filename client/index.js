@@ -12,7 +12,6 @@ const swatchContainer = document.querySelector('#swatches');
  */
 const rgbaToHex = (rgba) => {
   const [, red, green, blue] = rgba.match(/rgba*\((\d+), (\d+), (\d+)(?:, \d*\.?\d*)?\)/);
-  // TODO: figure out what to do about alpha values
   const redString = parseInt(red, 10).toString(16).padStart(2, '0');
   const greenString = parseInt(green, 10).toString(16).padStart(2, '0');
   const blueString = parseInt(blue, 10).toString(16).padStart(2, '0');
@@ -46,7 +45,7 @@ const handleColorInput = (e, components) => {
   });
 };
 
-const handleSubmitPalette = (e) => {
+const handleSubmitPalette = (e, url) => {
   e.preventDefault();
 
   // get the palette again
@@ -59,7 +58,6 @@ const handleSubmitPalette = (e) => {
 
     // get name and website
     const paletteName = document.querySelector('#palette-name').value;
-    const paletteWebsite = document.querySelector('#palette-website').value;
     // TODO: figure out what we want for the website.
 
     // retrieving the palette from content.js
@@ -77,7 +75,7 @@ const handleSubmitPalette = (e) => {
           body: JSON.stringify({
             palette,
             name: paletteName,
-            website: paletteWebsite,
+            website: url,
           }),
         });
         const apiResponse = await rawAPIResponse.json();
@@ -123,13 +121,15 @@ getPaletteButton.addEventListener('click', () => {
         palette.sort((color1, color2) => color2.components.length - color1.components.length);
         // TODO: sorting by the number of components often will not give the components that cover
         //       the majority of the screen. is there a better way to sort?
+        //       or we could also allow the user to paginate through all the colors. that doesn't
+        //       take care of sorting, but it does give the user more power.
+
         // TODO: how much of the palette do we actually want to save? right now it's all of it
 
         const abridgedPalette = palette.slice(0, 10);
         abridgedPalette.forEach((color) => {
           const swatch = document.createElement('input');
           swatch.type = 'color';
-          // swatch.value = rgbaToHex(color.color);
           swatch.value = rgbaToHex(`rgb(${color.color.red}, ${color.color.green}, ${color.color.blue})`);
           swatch.addEventListener('input', (e) => handleColorInput(e, color.components));
           // TODO: add a feature to flash the elements associated with a certain color on click
@@ -144,17 +144,10 @@ getPaletteButton.addEventListener('click', () => {
         paletteNameInput.placeholder = 'Palette Name';
         document.body.appendChild(paletteNameInput);
 
-        const paletteWebsiteInput = document.createElement('input');
-        paletteWebsiteInput.type = 'text';
-        paletteWebsiteInput.id = 'palette-website';
-        paletteWebsiteInput.placeholder = 'Website URL';
-        paletteWebsiteInput.value = url;
-        document.body.appendChild(paletteWebsiteInput);
-
         const submitPaletteButton = document.createElement('button');
         submitPaletteButton.id = 'submit-palette';
         submitPaletteButton.textContent = 'Submit Palette';
-        submitPaletteButton.addEventListener('click', handleSubmitPalette);
+        submitPaletteButton.addEventListener('click', (e) => handleSubmitPalette(e, url));
         document.body.appendChild(submitPaletteButton);
       } else {
         failDisplay.textContent = 'Error. View console for more information.';

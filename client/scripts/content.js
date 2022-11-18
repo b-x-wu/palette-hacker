@@ -80,7 +80,7 @@ function applyColorOnElement(element, attribute, colorCode) {
     return;
   }
   element.style.setProperty(attribute, colorCode);
-} // TODO: this doesn't work because there is no match because the alpha is a decimal with a dot
+}
 
 function rgbaToCommaDelimittedRGB(rgba) {
   const [, red, green, blue] = rgba.match(/rgba*\((\d+), (\d+), (\d+)(?:, \d*\.?\d*)?\)/);
@@ -110,7 +110,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     ];
 
     // iterate through all the elements of the DOM
-    // TODO: figure out what to do about alpha value
     const colorInfo = {};
     iterateThroughDOM((node, selector) => {
       // for each node in the dom, either add it to an
