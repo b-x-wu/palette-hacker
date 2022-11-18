@@ -163,7 +163,7 @@ app.get('/website_palettes', (req, res) => {
     .then((docs) => {
       res.json({
         status: 'success',
-        data: docs.map((doc) => ({ name: doc.name, website: doc.website }))
+        data: docs
           .filter((doc) => {
             // return true if doc.website is an anscestor path of
             // or is equal to req.query.website
@@ -185,7 +185,9 @@ app.get('/website_palettes', (req, res) => {
           .map((doc) => {
             // add a relevance field
             const relevance = doc.website.split('/').length;
-            return { ...doc, relevance };
+            return {
+              name: doc.name, website: doc.website, palette: doc.palette, relevance,
+            };
           })
           .sort((doc1, doc2) => doc2.relevance - doc1.relevance),
       });
