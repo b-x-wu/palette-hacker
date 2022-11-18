@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD029 -->
 # Color Palette DevLog
 
 ## 11/15/2022
@@ -64,3 +65,39 @@ I'm going to class now. I'll think about implementation later.
 ### 11:48 PM
 
 Ok, before I work out the above issue, it turns out I forgot to configure all my Mongoose stuff with Typescript. I've now created types that correspond to my schema. At some point, I need to throw that into a `@types` directory, but I'm saying that that problem has the same priority as the "put the front-end in Webpack and Typescript" problem, which is to say, very likely out of scope.
+
+### 12:36 AM
+
+So it seems I really want to put off the whole path matching thing. I spent some time refactoring the front-end code to make it more functionally focused and easier to find stuff. I also implemented the naive whole-path matching schema, though it's not implemented in the front end yet. We're getting there.
+
+### 1:07 AM
+
+Turns out `$where` isn't allowed in the MongoDB free tier. I don't want this code to go to waste though, so here's what I had written before I found out:
+
+```typescript
+$where(() => {
+    // return true if this.website contains the anscestor path of 
+    // or is equal to req.query.website
+    const dbPaths = ((this as unknown) as Palette).name.split('/');
+    const currentWebsitePaths = (req.query.website as string).split('/');
+
+    if (dbPaths.length > currentWebsitePaths.length) {
+        return false;
+    }
+
+    for (let i = 0; i < dbPaths.length; i++) {
+        if (dbPaths[i] !== currentWebsitePaths[i]) {
+            return false;
+        }
+    }
+    return true;
+})
+```
+
+I will be writing a very strongly worded letter to MongoDB, believe you me.
+
+### 1:38 AM
+
+Good news is that I just repurposed the above code into a filter of the results that came back from the db. I put in some preliminary filtering by same url origin just to make sure that I'm not doing this on *every* conceivable palette. This is still not ideal since it's wildly inefficient and the response from the db could still be quite large. Maybe I should implement pagination?
+
+We push on. Let's make a call from the front-end to process it.
