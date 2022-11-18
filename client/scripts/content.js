@@ -1,3 +1,5 @@
+// ---------------------------- UTILITY FUNCTIONS ----------------------------
+
 /**
  *
  * @param {Node} node the node to iterate from
@@ -82,112 +84,124 @@ function applyColorOnElement(element, attribute, colorCode) {
   element.style.setProperty(attribute, colorCode);
 }
 
+/**
+ * Converts the standard rgba string form into a more easily processed R,G,B form
+ * @param {string} rgba string representation of color of form rgba(R, G, B, A)
+ * @returns a string representation of the color R,G,B. each color is between 0 and 255, base10
+ */
 function rgbaToCommaDelimittedRGB(rgba) {
   const [, red, green, blue] = rgba.match(/rgba*\((\d+), (\d+), (\d+)(?:, \d*\.?\d*)?\)/);
   return [red, green, blue].join(',');
 }
 
-// process messages received
+// ------------------------ MESSAGE LISTENERS ---------------------
+
+function onGetDOM(sendResponse) {
+  // message from popup to send back the dom
+
+  const colorAttributes = [
+    'background-color',
+    'border-bottom-color',
+    'border-left-color',
+    'border-right-color',
+    'border-top-color',
+    'caret-color',
+    'color',
+    'column-rule-color',
+    'outline-color',
+    'text-decoration-color',
+  ];
+
+  // iterate through all the elements of the DOM
+  const colorInfo = {};
+  iterateThroughDOM((node, selector) => {
+    // for each node in the dom, either add it to an
+    // existing color or create a new color and add itself to it
+    const style = getComputedStyle(node);
+    colorAttributes.forEach((attribute) => {
+      const color = rgbaToCommaDelimittedRGB(style.getPropertyValue(attribute));
+      const component = {
+        selector,
+        attribute,
+      };
+      if (Object.hasOwn(colorInfo, color)) {
+        colorInfo[color].push(component);
+      } else {
+        colorInfo[color] = [component];
+      }
+    });
+  });
+
+  // transform into palette array
+  const colors = Object.getOwnPropertyNames(colorInfo);
+  const palette = [];
+  for (let i = 0; i < colors.length; i++) {
+    // get unique node/attribute properties
+    const components = Array.from(
+      colorInfo[colors[i]].reduce((curSet, e) => curSet.add(JSON.stringify(e)), new Set()),
+    ).map((ele) => JSON.parse(ele));
+    // add new color and unique components to palette
+    const [redString, greenString, blueString] = colors[i].split(',');
+    palette.push({
+      color: {
+        red: parseInt(redString, 10),
+        green: parseInt(greenString, 10),
+        blue: parseInt(blueString, 10),
+      },
+      components,
+    });
+  }
+
+  console.log('returning DOM');
+  const response = {
+    status: 'success',
+    data: {
+      palette,
+      url: window.location.href,
+    },
+  };
+  sendResponse(response);
+}
+
+function onChangeDOM(message, sendResponse) {
+  try {
+    message.data.components.forEach((component) => {
+      const elements = document.querySelectorAll(component.selector);
+      elements.forEach((element) => {
+        applyColorOnElement(element, component.attribute, message.data.newColor);
+        // element.style.setProperty(component.attribute, message.data.newColor);
+      });
+    });
+    sendResponse({
+      status: 'success',
+      data: null,
+    });
+  } catch (e) {
+    // catch any potential errors and respond with them
+    sendResponse({
+      status: 'error',
+      message: e.message,
+    });
+  }
+}
+
+// ------------------------- LISTEN FOR MESSAGES -----------------------
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Message received in content.js');
   console.log('message:', message);
   console.log('sender:', sender);
 
   if (message.author === 'popup' && message.request === 'getDOM') {
-    // message from popup to send back the dom
-
-    const colorAttributes = [
-      'background-color',
-      'border-bottom-color',
-      'border-left-color',
-      'border-right-color',
-      'border-top-color',
-      'caret-color',
-      'color',
-      'column-rule-color',
-      'outline-color',
-      'text-decoration-color',
-    ];
-
-    // iterate through all the elements of the DOM
-    const colorInfo = {};
-    iterateThroughDOM((node, selector) => {
-      // for each node in the dom, either add it to an
-      // existing color or create a new color and add itself to it
-      const style = getComputedStyle(node);
-      colorAttributes.forEach((attribute) => {
-        const color = rgbaToCommaDelimittedRGB(style.getPropertyValue(attribute));
-        const component = {
-          selector,
-          attribute,
-        };
-        if (Object.hasOwn(colorInfo, color)) {
-          colorInfo[color].push(component);
-        } else {
-          colorInfo[color] = [component];
-        }
-      });
-    });
-
-    // transform into palette array
-    const colors = Object.getOwnPropertyNames(colorInfo);
-    const palette = [];
-    for (let i = 0; i < colors.length; i++) {
-      // get unique node/attribute properties
-      const components = Array.from(
-        colorInfo[colors[i]].reduce((curSet, e) => curSet.add(JSON.stringify(e)), new Set()),
-      ).map((ele) => JSON.parse(ele));
-      // add new color and unique components to palette
-      const [redString, greenString, blueString] = colors[i].split(',');
-      palette.push({
-        color: {
-          red: parseInt(redString, 10),
-          green: parseInt(greenString, 10),
-          blue: parseInt(blueString, 10),
-        },
-        components,
-      });
-    }
-
-    console.log('returning DOM');
-    const response = {
-      status: 'success',
-      data: {
-        palette,
-        url: window.location.href,
-      },
-    };
-    sendResponse(response);
+    onGetDOM(sendResponse);
   } else if (message.author === 'popup' && message.request === 'changeColor') {
     // change the style of all the components to the new color
-    let response;
-    try {
-      message.data.components.forEach((component) => {
-        const elements = document.querySelectorAll(component.selector);
-        elements.forEach((element) => {
-          applyColorOnElement(element, component.attribute, message.data.newColor);
-          // element.style.setProperty(component.attribute, message.data.newColor);
-        });
-      });
-      response = {
-        status: 'success',
-        data: null,
-      };
-    } catch (e) {
-      // catch any potential errors and respond with them
-      response = {
-        status: 'error',
-        message: e.message,
-      };
-    } finally {
-      sendResponse(response);
-    }
+    onChangeDOM(message, sendResponse);
   } else {
     // unknown author or request
-    const response = {
+    sendResponse({
       status: 'error',
       message: 'Invalid author or request',
-    };
-    sendResponse(response);
+    });
   }
 });
