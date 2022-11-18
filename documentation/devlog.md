@@ -101,3 +101,9 @@ I will be writing a very strongly worded letter to MongoDB, believe you me.
 Good news is that I just repurposed the above code into a filter of the results that came back from the db. I put in some preliminary filtering by same url origin just to make sure that I'm not doing this on *every* conceivable palette. This is still not ideal since it's wildly inefficient and the response from the db could still be quite large. Maybe I should implement pagination?
 
 We push on. Let's make a call from the front-end to process it.
+
+## 11/18/22
+
+### 12:13 PM
+
+After a night of falling asleep in the library, I've written the code that brings in the palettes to the front-end. I have very little error checking going on right now, and I haven't set the error codes for failure responses from the back-end, I should do that. The next step is to present the palettes as actual palettes on the front end. This probably involves a little html cleanup which I've been putting off anyhow.

@@ -1,6 +1,5 @@
 const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
 // const baseEndpoint = 'https://palette-hacker.herokuapp.com';
-const getPaletteButton = document.querySelector('#get-palette');
 const successDisplay = document.querySelector('#success-display');
 const failDisplay = document.querySelector('#fail-display');
 const swatchContainer = document.querySelector('#swatches');
@@ -19,6 +18,32 @@ function rgbaToHex(rgba) {
   const blueString = parseInt(blue, 10).toString(16).padStart(2, '0');
   const hex = `#${redString}${greenString}${blueString}`;
   return hex;
+}
+
+/**
+ * Clears the success response and displays a failure message in the relevant div
+ * @param {string} message the failure message to display
+ */
+function displayFailMessage(message) {
+  successDisplay.textContent = '';
+  failDisplay.textContent = message;
+}
+
+/**
+ * Clears the failure response and displays a success message in the relevant div
+ * @param {string} message the success message to display
+ */
+function displaySucessMessage(message) {
+  failDisplay.textContent = '';
+  successDisplay.textContent = message;
+}
+
+/**
+ * Clears the message display divs
+ */
+function clearMessageDisplays() {
+  failDisplay.textContent = '';
+  successDisplay.textContent = '';
 }
 
 // ----------------------- EVENT LISTENERS ----------------------------
@@ -86,15 +111,13 @@ function handleSubmitPalette(e, url) {
 
         // send message out to user
         if (apiResponse.status === 'success') {
-          successDisplay.textContent = 'Successfully submitted palette.';
+          displaySucessMessage('Successfully submitted palette.');
           console.log(apiResponse.data);
         } else if (apiResponse.status === 'error') {
-          failDisplay.textContent = 'Error. View console for more information.';
-          console.log(apiResponse.message);
+          displayFailMessage(`Error: ${apiResponse.message}`);
         }
       } else {
-        failDisplay.textContent = 'Error. View console for more information.';
-        console.log(chromeResponse.message);
+        displayFailMessage(`Error: ${chromeResponse.message}`);
       }
     });
   });
@@ -102,7 +125,7 @@ function handleSubmitPalette(e, url) {
 
 function handleGetPalette() {
   // sanity check to show that button was clicked
-  successDisplay.textContent = 'loading';
+  displaySucessMessage('Loading...');
 
   // send a message to content.js
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -128,31 +151,35 @@ function handlePageLoad() {
       request: 'getUrl',
     };
     try {
-      const response = await chrome.tabs.sendMessage(tabs[0].id, message);
-      const { url } = response.data;
+      const chromeResponse = await chrome.tabs.sendMessage(tabs[0].id, message);
+      const { url } = chromeResponse.data;
 
-      const palettes = (await (await fetch(`${baseEndpoint}/website_palettes?${new URLSearchParams({
+      const fetchResponse = await fetch(`${baseEndpoint}/website_palettes?${new URLSearchParams({
         website: url,
-      })}`)).json()).data;
+      })}`);
 
-      palettes.forEach((palette) => {
-        // TODO: sort out how to present palettes
-        const div = document.createElement('div');
-        div.classList.add('imported-palette');
-        div.textContent = `Name: ${palette.name}, Website: ${palette.website}, Relevance: ${palette.relevance}`;
-        document.body.appendChild(div);
-      });
+      if (fetchResponse.status === 200) {
+        const { palettes } = (await fetchResponse.json()).data;
+        palettes.forEach((palette) => {
+          // TODO: sort out how to present palettes
+          const div = document.createElement('div');
+          div.classList.add('imported-palette');
+          div.textContent = `Name: ${palette.name}, Website: ${palette.website}, Relevance: ${palette.relevance}`;
+          document.body.appendChild(div);
+        });
+      }
+      // TODO: handle 400 or 500 response
     } catch (e) {
-      console.log(`Could not get palettes: ${e}`);
+      displayFailMessage(`Error retrieving palettes: ${e.message}`);
     }
   });
 }
 
-// ----------------------- MESSAGE LISTENERS --------------------------
+// ----------------------- CHROME MESSAGE LISTENERS --------------------------
 
 function getPaletteMessageListener(response) {
+  clearMessageDisplays();
   if (response.status === 'success') {
-    successDisplay.textContent = 'Got DOM. View data in console.';
     // display the color palette out to the user
     // we probably don't want to display all the colors, maybe the most popular ones
     const { palette, url } = response.data;
@@ -175,8 +202,6 @@ function getPaletteMessageListener(response) {
       swatchContainer.appendChild(swatch);
     });
 
-    getPaletteButton.style.display = 'none';
-
     // create form submitting elemenets
     // TODO: can we do this with a template? or unhidden div?
     const paletteNameInput = document.createElement('input');
@@ -191,15 +216,14 @@ function getPaletteMessageListener(response) {
     submitPaletteButton.addEventListener('click', (e) => handleSubmitPalette(e, url));
     document.body.appendChild(submitPaletteButton);
   } else {
-    failDisplay.textContent = 'Error. View console for more information.';
-    console.log(response.message);
+    displayFailMessage(`Error: ${response.message}`);
   }
 }
 
 // ------------------------ MAIN --------------------------------------
 
 function main() {
-  getPaletteButton.addEventListener('click', handleGetPalette);
+  handleGetPalette();
   handlePageLoad();
 }
 

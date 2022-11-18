@@ -110,6 +110,7 @@ app.post('/register', (req, res) => {
 
 app.post('/add_palette', (req, res) => {
   if (!Object.hasOwn(req.body, 'palette')) {
+    res.status(400);
     res.json({
       status: 'fail',
       message: 'Request body missing palette',
@@ -135,6 +136,7 @@ app.post('/add_palette', (req, res) => {
     });
   }, (err) => {
     console.log(err.message);
+    res.status(500);
     res.json({
       status: 'error',
       message: 'Unknown database error.',
@@ -145,6 +147,7 @@ app.post('/add_palette', (req, res) => {
 app.get('/website_palettes', (req, res) => {
   // provides query params website or user
   if (!req.query.website) {
+    res.status(400);
     res.json({
       status: 'fail',
       data: {
@@ -163,37 +166,40 @@ app.get('/website_palettes', (req, res) => {
     .then((docs) => {
       res.json({
         status: 'success',
-        data: docs
-          .filter((doc) => {
-            // return true if doc.website is an anscestor path of
-            // or is equal to req.query.website
-            const dbPaths = doc.website.split('/');
-            const currentWebsitePaths = cleanUrl(req.query.website as string).split('/');
+        data: {
+          palettes: docs
+            .filter((doc) => {
+              // return true if doc.website is an anscestor path of
+              // or is equal to req.query.website
+              const dbPaths = doc.website.split('/');
+              const currentWebsitePaths = cleanUrl(req.query.website as string).split('/');
 
-            if (dbPaths.length > currentWebsitePaths.length) {
-              return false;
-            }
-
-            for (let i = 0; i < dbPaths.length; i++) {
-              if (dbPaths[i] !== currentWebsitePaths[i]) {
+              if (dbPaths.length > currentWebsitePaths.length) {
                 return false;
               }
-            }
 
-            return true;
-          })
-          .map((doc) => {
-            // add a relevance field
-            const relevance = doc.website.split('/').length;
-            return {
-              name: doc.name, website: doc.website, palette: doc.palette, relevance,
-            };
-          })
-          .sort((doc1, doc2) => doc2.relevance - doc1.relevance),
+              for (let i = 0; i < dbPaths.length; i++) {
+                if (dbPaths[i] !== currentWebsitePaths[i]) {
+                  return false;
+                }
+              }
+
+              return true;
+            })
+            .map((doc) => {
+              // add a relevance field
+              const relevance = doc.website.split('/').length;
+              return {
+                name: doc.name, website: doc.website, palette: doc.palette, relevance,
+              };
+            })
+            .sort((doc1, doc2) => doc2.relevance - doc1.relevance),
+        },
       });
     })
     .catch((err) => {
       console.log(err.message);
+      res.status(500);
       res.json({
         status: 'error',
         message: 'Unknown database error.',
