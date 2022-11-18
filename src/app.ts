@@ -157,7 +157,7 @@ app.get('/website_palettes', (req, res) => {
   // query the database for the website
   PaletteModel.find({
     website: {
-      $regex: `^${(new URL(req.query.website as string)).origin}.*$`,
+      $regex: `^${(new URL(cleanUrl(req.query.website as string))).origin}.*$`,
     },
   }) // TODO: i wish i could use $where here but the free tier doesn't allow that
     .then((docs) => {
@@ -168,7 +168,7 @@ app.get('/website_palettes', (req, res) => {
             // return true if doc.website is an anscestor path of
             // or is equal to req.query.website
             const dbPaths = doc.website.split('/');
-            const currentWebsitePaths = (req.query.website as string).split('/');
+            const currentWebsitePaths = cleanUrl(req.query.website as string).split('/');
 
             if (dbPaths.length > currentWebsitePaths.length) {
               return false;

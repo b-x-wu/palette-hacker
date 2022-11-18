@@ -185,6 +185,15 @@ function onChangeDOM(message, sendResponse) {
   }
 }
 
+function onGetUrl(sendResponse) {
+  sendResponse({
+    status: 'success',
+    data: {
+      url: window.location.href,
+    },
+  });
+}
+
 // ------------------------- LISTEN FOR MESSAGES -----------------------
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -197,6 +206,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.author === 'popup' && message.request === 'changeColor') {
     // change the style of all the components to the new color
     onChangeDOM(message, sendResponse);
+  } else if (message.author === 'popup' && message.request === 'getUrl') {
+    onGetUrl(sendResponse);
   } else {
     // unknown author or request
     sendResponse({

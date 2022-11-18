@@ -120,6 +120,34 @@ function handleGetPalette() {
   });
 }
 
+function handlePageLoad() {
+  // get the url of the page
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+    const message = {
+      author: 'popup',
+      request: 'getUrl',
+    };
+    try {
+      const response = await chrome.tabs.sendMessage(tabs[0].id, message);
+      const { url } = response.data;
+
+      const palettes = (await (await fetch(`${baseEndpoint}/website_palettes?${new URLSearchParams({
+        website: url,
+      })}`)).json()).data;
+
+      palettes.forEach((palette) => {
+        // TODO: sort out how to present palettes
+        const div = document.createElement('div');
+        div.classList.add('imported-palette');
+        div.textContent = `Name: ${palette.name}, Website: ${palette.website}, Relevance: ${palette.relevance}`;
+        document.body.appendChild(div);
+      });
+    } catch (e) {
+      console.log(`Could not get palettes: ${e}`);
+    }
+  });
+}
+
 // ----------------------- MESSAGE LISTENERS --------------------------
 
 function getPaletteMessageListener(response) {
@@ -172,6 +200,7 @@ function getPaletteMessageListener(response) {
 
 function main() {
   getPaletteButton.addEventListener('click', handleGetPalette);
+  handlePageLoad();
 }
 
 document.addEventListener('DOMContentLoaded', main);
