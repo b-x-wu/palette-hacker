@@ -155,11 +155,44 @@ app.get('/website_palettes', (req, res) => {
   }
 
   // query the database for the website
-  PaletteModel.find({ website: cleanUrl(req.query.website as string) })
-    .then(() => {
+  PaletteModel.find({
+    website: {
+      $regex: `^${(new URL(req.query.website as string)).origin}.*$`,
+    },
+  }) // TODO: i wish i could use $where here but the free tier doesn't allow that
+    .then((docs) => {
       res.json({
         status: 'success',
-        data: [],
+        data: docs
+          .filter((doc) => {
+            // return true if doc.website is an anscestor path of
+            // or is equal to req.query.website
+            const dbPaths = doc.website.split('/');
+            const currentWebsitePaths = (req.query.website as string).split('/');
+
+            if (dbPaths.length > currentWebsitePaths.length) {
+              return false;
+            }
+
+            for (let i = 0; i < dbPaths.length; i++) {
+              if (dbPaths[i] !== currentWebsitePaths[i]) {
+                return false;
+              }
+            }
+
+            return true;
+          })
+          .map((doc) => {
+            // add a relevance field
+            const relevance = doc.website.split('/').length;
+            return {
+              name: doc.name,
+              website: doc.website,
+              palette: doc.palette,
+              relevance,
+            };
+          })
+          .sort((doc1, doc2) => doc2.relevance - doc1.relevance),
       });
     })
     .catch((err) => {
