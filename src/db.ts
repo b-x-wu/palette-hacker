@@ -6,38 +6,58 @@ dotenv.config();
 
 const { Schema } = mongoose;
 
-// TODO: make fields required
 const UserSchema = new Schema<User>({
-  username: String,
-  hash: String,
+  username: {
+    type: String,
+    required: true,
+  },
+  hash: {
+    type: String,
+    required: true,
+  },
   palettes: [Types.ObjectId],
 });
 
 const PaletteSchema = new Schema<Palette>({
   user: Types.ObjectId,
-  website: String,
-  name: String,
+  website: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
   palette: [{
     color: {
       red: {
         type: Number,
+        required: true,
         min: 0,
         max: 255,
       },
       green: {
         type: Number,
+        required: true,
         min: 0,
         max: 255,
       },
       blue: {
         type: Number,
+        required: true,
         min: 0,
         max: 255,
       },
     },
     components: [{
-      selector: String,
-      attribute: String,
+      selector: {
+        type: String,
+        required: true,
+      },
+      attribute: {
+        type: String,
+        required: true,
+      },
     }],
   }],
 });
