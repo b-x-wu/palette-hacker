@@ -73,7 +73,7 @@ function rrggbbToRgba(rrggbb, alpha) {
  * @param {string} attribute the attribute of the element to apply the color to
  * @param {string} colorCode the color code (in #RRGGBB) to set the attribute to
  */
-function applyColorOnElement(element, attribute, colorCode) {
+function applyRRGGBBColorOnElement(element, attribute, colorCode) {
   // get the alpha value of the element
   const color = getComputedStyle(element).getPropertyValue(attribute);
   if (color.includes('rgba')) {
@@ -82,6 +82,23 @@ function applyColorOnElement(element, attribute, colorCode) {
     return;
   }
   element.style.setProperty(attribute, colorCode);
+}
+
+/**
+ * Applies a new color to the attribute of the element, preserving alpha
+ * @param {Element} element the element to apply the new color to
+ * @param {string} attribute the attribute of the element to apply the color to
+ * @param {Color} colorObject the color code in object form { red, green, blue }
+ */
+function applyObjectColorOnElement(element, attribute, colorObject) {
+  // get the alpha value of the element
+  const color = getComputedStyle(element).getPropertyValue(attribute);
+  if (color.includes('rgba')) {
+    const [, alpha] = color.match(/rgba\(\d+, \d+, \d+, (0?\.?\d+)\)/);
+    element.style.setProperty(attribute, `rgba(${colorObject.red}, ${colorObject.green}, ${colorObject.blue}, ${alpha})`);
+    return;
+  }
+  element.style.setProperty(attribute, `rgb(${colorObject.red}, ${colorObject.green}, ${colorObject.blue})`);
 }
 
 /**
@@ -168,8 +185,7 @@ function onChangeDOM(message, sendResponse) {
     message.data.components.forEach((component) => {
       const elements = document.querySelectorAll(component.selector);
       elements.forEach((element) => {
-        applyColorOnElement(element, component.attribute, message.data.newColor);
-        // element.style.setProperty(component.attribute, message.data.newColor);
+        applyRRGGBBColorOnElement(element, component.attribute, message.data.newColor);
       });
     });
     sendResponse({
@@ -194,6 +210,31 @@ function onGetUrl(sendResponse) {
   });
 }
 
+function onApplyPalette(message, sendResponse) {
+  const { swatches } = message.data;
+
+  // for each swatch
+  try {
+    swatches.forEach((swatch) => {
+      swatch.components.forEach((component) => {
+        document.querySelectorAll(component.selector).forEach((element) => {
+          applyObjectColorOnElement(element, component.attribute, swatch.color);
+        });
+      });
+    });
+
+    sendResponse({
+      status: 'success',
+      data: null,
+    });
+  } catch (e) {
+    sendResponse({
+      status: 'error',
+      message: e.message,
+    });
+  }
+}
+
 // ------------------------- LISTEN FOR MESSAGES -----------------------
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -208,6 +249,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     onChangeDOM(message, sendResponse);
   } else if (message.author === 'popup' && message.request === 'getUrl') {
     onGetUrl(sendResponse);
+  } else if (message.author === 'popup' && message.request === 'applyPalette') {
+    onApplyPalette(message, sendResponse);
   } else {
     // unknown author or request
     sendResponse({

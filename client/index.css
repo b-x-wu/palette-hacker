@@ -6,6 +6,10 @@
     background-color: lightcoral;
 }
 
+#loading-display {
+    background-color: lightgoldenrodyellow;
+}
+
 .retrieved-palette-color-square {
     display: inline-block;
     height: 10px;

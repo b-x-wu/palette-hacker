@@ -2,6 +2,7 @@ const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
 // const baseEndpoint = 'https://palette-hacker.herokuapp.com';
 const successDisplay = document.querySelector('#success-display');
 const failDisplay = document.querySelector('#fail-display');
+const loadingDisplay = document.querySelector('#loading-display');
 const swatchContainer = document.querySelector('#swatches');
 
 // ----------------------- UTILITY FUNCTIONS ----------------------------
@@ -34,6 +35,7 @@ function colorObjectToRGB(colorObj) {
  * @param {string} message the failure message to display
  */
 function displayFailMessage(message) {
+  loadingDisplay.textContent = '';
   successDisplay.textContent = '';
   failDisplay.textContent = message;
 }
@@ -43,8 +45,19 @@ function displayFailMessage(message) {
  * @param {string} message the success message to display
  */
 function displaySucessMessage(message) {
+  loadingDisplay.textContent = '';
   failDisplay.textContent = '';
   successDisplay.textContent = message;
+}
+
+/**
+ * Display a loading message
+ * @param {string} message the message to display
+ */
+function displayLoadingMessage(message) {
+  successDisplay.textContent = '';
+  loadingDisplay.textContent = message;
+  failDisplay.textContent = '';
 }
 
 /**
@@ -86,6 +99,7 @@ function handleColorInput(e, components) {
 
 function handleSubmitPalette(e, url) {
   e.preventDefault();
+  displayLoadingMessage('Submitting palette...');
 
   // get the palette again
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -135,7 +149,7 @@ function handleSubmitPalette(e, url) {
 
 async function handleGetPalette() {
   // TODO: I don't know if this should count as a success message
-  displaySucessMessage('Loading palette for current website...');
+  displayLoadingMessage('Loading palette for current website...');
 
   // send a message to content.js
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -151,6 +165,50 @@ async function handleGetPalette() {
     //       https://developer.chrome.com/docs/extensions/mv3/messaging/
     chrome.tabs.sendMessage(tabs[0].id, message, getPaletteMessageListener);
   });
+}
+
+async function handleApplyPalette(event, id) {
+  event.preventDefault();
+
+  // make fetch request for the palette
+  displayLoadingMessage('Applying palette...');
+  try {
+    const fetchResponse = await fetch(`${baseEndpoint}/get_palette?${new URLSearchParams({
+      objectId: id,
+    })}`);
+    const response = await fetchResponse.json();
+
+    // check for errors
+    if (fetchResponse.status === 400) {
+      throw new Error(response.data.reason);
+    } else if (fetchResponse.status === 500) {
+      throw new Error(response.message);
+    }
+
+    const { palette } = response.data;
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const message = {
+        author: 'popup',
+        request: 'applyPalette',
+        data: {
+          swatches: palette.swatches,
+        },
+      };
+
+      // TODO: if we want more info, we have to make a custom response listener
+      // chrome.tabs.sendMessage(tabs[0].id, message, (handleGetPalette));
+      chrome.tabs.sendMessage(tabs[0].id, message, (chromeResponse) => {
+        if (chromeResponse.status === 'success') {
+          displaySucessMessage(chromeResponse.status);
+        } else {
+          displayFailMessage(chromeResponse.message);
+        }
+      });
+    });
+  } catch (e) {
+    displayFailMessage(`Error: ${e.message}`);
+  }
 }
 
 async function handleRetrieveWebsitePalettes() {
@@ -178,9 +236,10 @@ async function handleRetrieveWebsitePalettes() {
         palettes.forEach((palette) => {
           console.log(palette);
           const retrievedPalette = retrievedPaletteTemplate.content.cloneNode(true);
-          retrievedPalette.querySelector('.retrieved-palette').id = `ID-${palette.objectId}`;
+          // retrievedPalette.querySelector('.retrieved-palette').id = `ID-${palette.objectId}`;
           retrievedPalette.querySelector('.palette-name').textContent = palette.name;
           retrievedPalette.querySelector('.palette-relevance').textContent = palette.relevance;
+          retrievedPalette.querySelector('.apply-palette').addEventListener('click', (e) => handleApplyPalette(e, palette.objectId));
 
           const palettePreview = retrievedPalette.querySelector('.palette-preview');
           palette.colors.slice(0, 5).forEach((color) => {
@@ -232,6 +291,7 @@ function getPaletteMessageListener(response) {
     // show the form to submit palette
     document.querySelector('#submit-palette-form').style.display = 'block';
     document.querySelector('#submit-palette').addEventListener('click', (e) => handleSubmitPalette(e, url));
+    displaySucessMessage('Retrieved website palette');
   } else {
     displayFailMessage(`Error: ${response.message}`);
   }

@@ -113,3 +113,17 @@ There has been a good deal of messing around with setting the id of a document f
 I've also made it so that when getting all the matching palettes from the back-end, we're not sending all the component information. That should reduce payload size a good amount.
 
 Now let's make the actual call to get and apply the specific palette we want.
+
+## 11/19/22 1:29 PM
+
+Well, against all odds, we did it. Despite breaking out every nested for-loop I had in the book, clicking the apply button now applies the palette to the site. I haven't tested how well it works for less relevant pages yet. I guess a lot of work that I did revolves around this.
+
+Also, it turns out I didn't neet to bother with setting the id of the div. I could just set the event listener parameters without having to collect it afterwards.
+
+This is a proof of concept now, which is nice. There's a few things to definitely clean up though.
+
+1. Send a response for applying a header to the user.
+2. Sort out the ordering of messages. Also, should there be a timeout on the messages so they don't stick around forever.
+3. Have a better way to order the palettes presented from the website on first load and/or work out a pagination system to set any part of the page's colors you want.
+4. The Typescript on the frontend with babel and webpack.
+5. Making the API RESTful.
