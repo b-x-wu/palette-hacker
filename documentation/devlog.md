@@ -1,29 +1,25 @@
 <!-- markdownlint-disable MD029 -->
 # Color Palette DevLog
 
-## 11/15/2022
-
-### 10:51 PM
+## 11/15/2022 10:51 PM
 
 Tackling the alpha value problem. Here's how I'm going to try to do it. The color codes that gets passed from `content.js`, `index.js`, and the database are going to be in `#RRGGBB` format exclusively. This means that when applying colors onto the page, we need to adapt the color to have the same alpha value as was already present in the node.
 
-### 11:15 PM
+## 11/15/2022 11:15 PM
 
 Turns out that the alpha value in `rgba` is a float between zero and one, which will be a pain to encode in the `#RRGGBBAA` format. Maybe I should just be storing color as its own type with properties `red`, `green`, and `blue` which are all numbers from 0 to 255. That way, the web representation of the color can be done with `rgba` always and in base 10.
 
-### 11:55 PM
+## 11/15/2022 11:55 PM
 
 I got the front-end color picker working again, now with support for alpha values. That is, picking a color doesn't automatically override the opacity to be full. I also modified the color representation in the front end to be an object with `red`, `green`, and `blue` properties. I feel very nervous about this, particularly because I have no type safety at all, especially in the front-end. Now I have to make sure that it works in the back-end.
 
-### 12:02 AM
+## 11/16/2022 12:02 AM
 
 Everything is hooked up for opacity support, with the only real overhaul being the color representation in the database. This is better than storing it as a hex string. The typing is making me more an more nervous every day, but getting the front-end sorted with webpack is still definitely a stretch goal. I'm calling it a night. Commiting and pushing.
 
 Next steps are logging in and subsequent session persistance and taking palettes from the database and applying them to pages.
 
-## 11/16/22
-
-### 11:34 AM
+## 11/16/22 11:34 AM
 
 Ok new day. I think I'm going to try to sort out taking palettes from the database that exist for a certain website and applying it. My biggest concern is how to match websites so that their palettes line up. For example, if the person made the palette on `https://google.com/search?=bat+signal` and somebody else goes to `https://google.com`, will they see the palette that the first person made? Here are the options.
 
@@ -42,7 +38,7 @@ I'm going to try matching the domain and path first. This means matching everyth
 
 First things first though, I need to change what's being sent as the website property in the database. This means removing the user's ability to add the website in as their query and getting only the domain and path to save.
 
-### 12:09 PM
+## 11/16/22 12:09 PM
 
 The website stored in the db is now stripped of the fragment and the query parameter. But the more I look, the more I find examples of path matching not working out because child paths should be inheritting the styles ancestor paths. But there are also cases where this isn't true. For example, `https://nyu-software-engineering.github.io/course-materials/slides/what-is-software-engineering` should not be inheritting the styles of `https://nyu-software-engineering.github.io/course-materials`. For posterity:
 
@@ -60,17 +56,15 @@ Maybe in the end I could pull from the db all the palettes whose websites match 
 
 I'm going to class now. I'll think about implementation later.
 
-## 11/17/22
-
-### 11:48 PM
+## 11/17/22 11:48 PM
 
 Ok, before I work out the above issue, it turns out I forgot to configure all my Mongoose stuff with Typescript. I've now created types that correspond to my schema. At some point, I need to throw that into a `@types` directory, but I'm saying that that problem has the same priority as the "put the front-end in Webpack and Typescript" problem, which is to say, very likely out of scope.
 
-### 12:36 AM
+## 11/17/22 12:36 AM
 
 So it seems I really want to put off the whole path matching thing. I spent some time refactoring the front-end code to make it more functionally focused and easier to find stuff. I also implemented the naive whole-path matching schema, though it's not implemented in the front end yet. We're getting there.
 
-### 1:07 AM
+## 11/18/22 1:07 AM
 
 Turns out `$where` isn't allowed in the MongoDB free tier. I don't want this code to go to waste though, so here's what I had written before I found out:
 
@@ -96,14 +90,26 @@ $where(() => {
 
 I will be writing a very strongly worded letter to MongoDB, believe you me.
 
-### 1:38 AM
+## 11/18/22 1:38 AM
 
 Good news is that I just repurposed the above code into a filter of the results that came back from the db. I put in some preliminary filtering by same url origin just to make sure that I'm not doing this on *every* conceivable palette. This is still not ideal since it's wildly inefficient and the response from the db could still be quite large. Maybe I should implement pagination?
 
 We push on. Let's make a call from the front-end to process it.
 
-## 11/18/22
-
-### 12:13 PM
+## 11/18/22 12:13 PM
 
 After a night of falling asleep in the library, I've written the code that brings in the palettes to the front-end. I have very little error checking going on right now, and I haven't set the error codes for failure responses from the back-end, I should do that. The next step is to present the palettes as actual palettes on the front end. This probably involves a little html cleanup which I've been putting off anyhow.
+
+## 11/19/22 11:29 AM
+
+I have the palettes coming in to the front end now and being displayed on the front end. Now it has to do something. The problem is that (especially without a stateful system) I don't know where to store the info about the palettes. Here's my initial thought: I can send the object id along with the inital payload for getting all the matching palettes. Then, the object id can be stored as an attribute on the div that houses the palette on the front end. The event listener for applying the palette then makes another request for the whole palette and applies those to the website. The fringe benefit of this is that we can reduce our payload going to the site by reducing the size and scope of the palettes being passed in all at once. What I'm not really sure about is if the object id is sensitive. I'm going to assume no for now until told otherwise.
+
+Also, I'm starting to think login and registration are out of the scope of this project, and might frankly not even be a very good part of the UX. I would include them just to hit the form limit, but if background requests count as forms, then I'm well over.
+
+## 11/19/22 12:09 PM
+
+There has been a good deal of messing around with setting the id of a document fragment. It turns out, you can't do that. My problem was thinking that the fragment represented the whole entirety of the outermost element, but it makes sense why that's not the case, if there's more than one outermost element.
+
+I've also made it so that when getting all the matching palettes from the back-end, we're not sending all the component information. That should reduce payload size a good amount.
+
+Now let's make the actual call to get and apply the specific palette we want.

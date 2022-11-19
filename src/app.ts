@@ -144,7 +144,7 @@ app.post('/add_palette', (req, res) => {
   });
 });
 
-app.get('/website_palettes', (req, res) => {
+app.get('/get_website_palettes', (req, res) => {
   // provides query params website or user
   if (!req.query.website) {
     res.status(400);
@@ -190,7 +190,11 @@ app.get('/website_palettes', (req, res) => {
               // add a relevance field
               const relevance = doc.website.split('/').length;
               return {
-                name: doc.name, website: doc.website, palette: doc.palette, relevance,
+                objectId: doc.id,
+                name: doc.name,
+                website: doc.website,
+                colors: doc.palette.map((swatch) => swatch.color),
+                relevance,
               };
             })
             .sort((doc1, doc2) => doc2.relevance - doc1.relevance),
@@ -205,6 +209,61 @@ app.get('/website_palettes', (req, res) => {
         message: 'Unknown database error.',
       });
     });
+});
+
+app.get('/get_palette', async (req, res) => {
+  if (!req.query.objectId) {
+    res.status(400);
+    res.json({
+      status: 'fail',
+      data: {
+        reason: 'No object id provided',
+      },
+    });
+    return;
+  }
+
+  if (req.query.objectId.length !== 24) {
+    res.status(400);
+    res.json({
+      status: 'fail',
+      data: {
+        reason: 'Improperly formatted objectId. Must be a string of 24 hex characters.',
+      },
+    });
+    return;
+  }
+
+  try {
+    const doc = await PaletteModel.findById(req.query.objectId);
+    if (!doc) {
+      res.status(400);
+      res.json({
+        status: 'fail',
+        data: {
+          reason: 'No palette with that id exists.',
+        },
+      });
+      return;
+    }
+
+    res.json({
+      status: 'success',
+      data: {
+        palette: {
+          name: doc.name,
+          swatches: doc.palette,
+        },
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500);
+    res.json({
+      status: 'error',
+      message: 'Unknown database error.',
+    });
+  }
 });
 
 app.listen(port, () => console.log(`⚡ Express is listening at http://localhost:${port}⚡`));
