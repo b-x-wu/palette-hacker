@@ -29,3 +29,5 @@ export interface Palette {
     name: string;
     palette: Swatch[]
 }
+// TODO: i didn't realize how confusing it was to have the interface named palette
+//       and the property name palette. we should probably change that to 'swatches'

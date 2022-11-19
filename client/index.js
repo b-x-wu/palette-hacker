@@ -50,10 +50,10 @@ function displaySucessMessage(message) {
 /**
  * Clears the message display divs
  */
-function clearMessageDisplays() {
-  failDisplay.textContent = '';
-  successDisplay.textContent = '';
-}
+// function clearMessageDisplays() {
+//   failDisplay.textContent = '';
+//   successDisplay.textContent = '';
+// }
 
 // ----------------------- EVENT LISTENERS ----------------------------
 
@@ -66,6 +66,7 @@ function clearMessageDisplays() {
  */
 function handleColorInput(e, components) {
   e.preventDefault();
+  // TODO: maybe only display submission form after a color has been changed
   // send a message to content.js with component information
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const message = {
@@ -163,7 +164,7 @@ async function handleRetrieveWebsitePalettes() {
       const chromeResponse = await chrome.tabs.sendMessage(tabs[0].id, message);
       const { url } = chromeResponse.data;
 
-      const fetchResponse = await fetch(`${baseEndpoint}/website_palettes?${new URLSearchParams({
+      const fetchResponse = await fetch(`${baseEndpoint}/get_website_palettes?${new URLSearchParams({
         website: url,
       })}`);
 
@@ -173,17 +174,22 @@ async function handleRetrieveWebsitePalettes() {
         const { palettes } = fetchResponseBody.data;
         const retrievedPalettesContainer = document.querySelector('#retrieved-palettes');
         const retrievedPaletteTemplate = document.querySelector('#retrieved-palette-template');
+
         palettes.forEach((palette) => {
+          console.log(palette);
           const retrievedPalette = retrievedPaletteTemplate.content.cloneNode(true);
+          retrievedPalette.querySelector('.retrieved-palette').id = `ID-${palette.objectId}`;
           retrievedPalette.querySelector('.palette-name').textContent = palette.name;
           retrievedPalette.querySelector('.palette-relevance').textContent = palette.relevance;
+
           const palettePreview = retrievedPalette.querySelector('.palette-preview');
-          palette.palette.slice(0, 5).forEach((swatch) => {
+          palette.colors.slice(0, 5).forEach((color) => {
             const colorSquare = document.createElement('div');
             colorSquare.classList.add('retrieved-palette-color-square');
-            colorSquare.style.backgroundColor = colorObjectToRGB(swatch.color);
+            colorSquare.style.backgroundColor = colorObjectToRGB(color);
             palettePreview.appendChild(colorSquare);
           });
+
           retrievedPalettesContainer.appendChild(retrievedPalette);
         });
       } else if (fetchResponse.status === 400) {
@@ -200,7 +206,6 @@ async function handleRetrieveWebsitePalettes() {
 // ----------------------- CHROME MESSAGE LISTENERS --------------------------
 
 function getPaletteMessageListener(response) {
-  clearMessageDisplays();
   if (response.status === 'success') {
     // display the color palette out to the user
     // we probably don't want to display all the colors, maybe the most popular ones
