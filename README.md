@@ -37,7 +37,11 @@ An Example Palette:
   name: "Dark Mode",
   palette: [
     {
-      color: "#124352",
+      color: {
+        red: 0,
+        green: 0,
+        blue: 0,
+      },
       components: [
         {
           selector: "body>DIV",
@@ -104,27 +108,19 @@ An Example Palette:
 
 ## Research Topics
 
-* (5 points) Chrome extensions
+* (6 points) Chrome extensions
   * Ultimately, my web app will be a Google Chrome extension. This comes with its own API and a required Manifest doc to be written.
   * I have little to no experience in this area, and I expect it to be a bit of a learning curve.
-* (4 points) React
-  * I have some experience in React, but none in hooking up and deploying a React app with a Node back end.
-  * Along with hooking it up in the extension, I suspect that this might be a little time consuming.
-* (1 point) TypeScript
+* (2 points) Postman
+  * I've been making calls through Postman and have created a host of request types in a Postman project
+  * I have next to no experience in Postman projects.
+* (2 point) TypeScript
   * Using TypeScript to try my best to avoid `undefined` or `null` type errors.
   * I have some experience with TypeScript with React.
 
 ## [Link to Initial Main Project File](./src/app.ts)
 
-## Considerations
-
-### Should traversal through the DOM tree give uniquely identifying query selectors?
-
-If we want uniquely identifying query selectors, we could just use `nth-child` for everything. However, semantically these selectors are meaningless (and also probably don't need to be stored explicitly as a query selector). This method means that any change in the ordering of the HTML of the page completely changes the way the palette affects the page.
-
-If we instead use tags, classes, and ids in the query selector, we aren't guaranteed that the selectors are uniquely selecting (that is using `document.querySelectorAll` may potentitially give back more than one element). As such, we are also not guaranteed that the selectors themselves are unique (that is we may have more than one of the same query selector being stored). This takes up more than the necssary amount of time in the database, and can remedied by checking if the query selector already exists, though that operation would make DOM traversal take magnitudes longer.
-
-In the end, we choose to go with non-unique tags, in order to prevent massive changes to how the palette affects the page if the page is changed at all. We will not worry about the non-unique query selectors being stored in the database since at most, the non-unique selectors are capped by the number DOM elements on the page which we were already expecting to store.
+## [DevLog](./documentation/devlog.md)
 
 ## Annotations / References Used
 
