@@ -127,3 +127,4 @@ This is a proof of concept now, which is nice. There's a few things to definitel
 3. Have a better way to order the palettes presented from the website on first load and/or work out a pagination system to set any part of the page's colors you want.
 4. The Typescript on the frontend with babel and webpack.
 5. Making the API RESTful.
+6. Keeping the palettes that somebody had made on websites before?
