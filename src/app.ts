@@ -1,14 +1,12 @@
 import express, { Application } from 'express';
-import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import './db';
-import { User, Palette } from './types';
+import { Palette } from './types';
 
 const app: Application = express();
 const port = process.env.PORT || 3001;
 
-const UserModel = mongoose.model<User>('User');
 const PaletteModel = mongoose.model<Palette>('Palette');
 
 // returns the url sans query params, fragment, or trailing slashes
@@ -34,78 +32,6 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
-});
-
-app.post('/register', (req, res) => {
-  if (!Object.hasOwn(req.body, 'username')) {
-    res.json({
-      status: 'fail',
-      data: {
-        reason: 'No username provided.',
-      },
-    });
-    return;
-  }
-  if (!Object.hasOwn(req.body, 'password')) {
-    res.json({
-      status: 'fail',
-      data: {
-        reason: 'No password provided.',
-      },
-    });
-    return;
-  }
-  const { username, password } = req.body;
-
-  // check for repeat username
-  UserModel.findOne({ username }).then((result) => {
-    if (result) {
-      throw new Error('Username already exists.');
-    }
-
-    bcrypt.hash(password, parseInt(process.env.HASH || '10', 10)).then((hash) => {
-      // send new user to mongodb
-      const newUser = new UserModel({
-        username,
-        hash,
-        palettes: [],
-      });
-
-      return newUser.save();
-    }).then(() => {
-      console.log(`New user ${username} created and saved.`);
-      res.json({
-        status: 'success',
-        data: {
-          username,
-        },
-      });
-    }).catch((err) => {
-      // unknown error from hash or mongodb saving
-      console.log(err.message);
-      res.json({
-        status: 'error',
-        message: 'Unknown registration error.',
-      });
-    });
-  }, (err) => {
-    // unknown mongodb error
-    console.log(err.message);
-    res.json({
-      status: 'error',
-      message: 'Unknown registration error.',
-    });
-  }).catch((err) => {
-    // username already exists
-    console.log(err.message);
-    res.json({
-      status: 'fail',
-      data: {
-        username,
-        reason: 'Username already exists.',
-      },
-    });
-  });
 });
 
 app.post('/add_palette', (req, res) => {

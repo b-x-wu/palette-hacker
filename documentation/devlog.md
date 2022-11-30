@@ -128,3 +128,7 @@ This is a proof of concept now, which is nice. There's a few things to definitel
 4. The Typescript on the frontend with babel and webpack.
 5. Making the API RESTful.
 6. Keeping the palettes that somebody had made on websites before?
+
+## 11/29/22 11:59 PM
+
+It's after Thanksgiving break, and I spent a good bit of time messing around with Webpack in a different branch, but now we're a few days from the due date. This means that I need to pick and choose what I actually want to do. First things first, I need to remove the login capability. Next, I need to apply some styles. I think I'm going to use Bootstrap for pretty.
