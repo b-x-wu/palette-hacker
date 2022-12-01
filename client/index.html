@@ -37,12 +37,23 @@
         </div>
     </div>
     <div id="retrieved-palettes">
+        <h3 class="text-light">Website Palettes</h3>
         <template id="retrieved-palette-template">
-            <div class="retrieved-palette">
-                <div class="palette-name"></div>
-                <div class="palette-relevance"></div>
-                <div class="palette-preview"></div>
-                <button class="apply-palette">Apply Palette</button>
+            <div class="retrieved-palette-wrapper">
+                <div class="retrieved-palette-container bg-light">
+                    <div class="row p-3">
+                        <div class="palette-name col-6 font-weight-bold text-left"></div>
+                        <div class="palette-relevance col-6 font-weight-bold text-right"></div>
+                    </div>
+                    <div class="row p-3">
+                        <div class="col-8">
+                            <div class="palette-preview row clearfix"></div>
+                        </div>
+                        <div class="col-4 text-right">
+                            <button class="apply-palette btn btn-secondary btn-small">Apply</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </template>
     </div>

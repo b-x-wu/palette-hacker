@@ -45,7 +45,7 @@ function displayFailMessage(message) {
  * Clears the failure response and displays a success message in the relevant div
  * @param {string} message the success message to display
  */
-function displaySucessMessage(message) {
+function displaySuccessMessage(message) {
   loadingDisplay.classList.add('hidden');
   failDisplay.classList.add('hidden');
   successDisplay.classList.remove('hidden');
@@ -131,7 +131,7 @@ function handleSubmitPalette(e, url) {
 
         // send message out to user
         if (apiResponse.status === 'success') {
-          displaySucessMessage('Successfully submitted palette.');
+          displaySuccessMessage('Successfully submitted palette.');
           console.log(apiResponse.data);
         } else if (apiResponse.status === 'error') {
           displayFailMessage(`Error: ${apiResponse.message}`);
@@ -144,12 +144,10 @@ function handleSubmitPalette(e, url) {
 }
 
 async function handleGetPalette() {
-  // TODO: I don't know if this should count as a success message
   displayLoadingMessage('Loading palette for current website...');
 
   // send a message to content.js
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    // prepare message
     // TODO: create documentation for what different requests are and do
     const message = {
       author: 'popup',
@@ -196,7 +194,7 @@ async function handleApplyPalette(event, id) {
       // chrome.tabs.sendMessage(tabs[0].id, message, (handleGetPalette));
       chrome.tabs.sendMessage(tabs[0].id, message, (chromeResponse) => {
         if (chromeResponse.status === 'success') {
-          displaySucessMessage(chromeResponse.status);
+          displaySuccessMessage('Successfully applied palette.');
         } else {
           displayFailMessage(chromeResponse.message);
         }
@@ -229,18 +227,29 @@ async function handleRetrieveWebsitePalettes() {
         const retrievedPalettesContainer = document.querySelector('#retrieved-palettes');
         const retrievedPaletteTemplate = document.querySelector('#retrieved-palette-template');
 
+        const maxRelevance = palettes.reduce((previousMax, currentPalette) => (
+          currentPalette.relevance > previousMax ? currentPalette.relevance : previousMax
+        ), -1);
+
         palettes.forEach((palette) => {
           console.log(palette);
           const retrievedPalette = retrievedPaletteTemplate.content.cloneNode(true);
-          // retrievedPalette.querySelector('.retrieved-palette').id = `ID-${palette.objectId}`;
           retrievedPalette.querySelector('.palette-name').textContent = palette.name;
-          retrievedPalette.querySelector('.palette-relevance').textContent = palette.relevance;
+          const relevancePercentage = palette.relevance / maxRelevance;
+          retrievedPalette.querySelector('.palette-relevance').textContent = `Relevance: ${Number(relevancePercentage).toLocaleString(
+            undefined,
+            {
+              style: 'percent', minimumFractionDigits: 2,
+            },
+          )}`;
+          retrievedPalette.querySelector('.palette-relevance').style.color = `rgb(${255 - 255 * relevancePercentage}, ${255 * relevancePercentage}, 100)`;
           retrievedPalette.querySelector('.apply-palette').addEventListener('click', (e) => handleApplyPalette(e, palette.objectId));
 
           const palettePreview = retrievedPalette.querySelector('.palette-preview');
           palette.colors.slice(0, 5).forEach((color) => {
             const colorSquare = document.createElement('div');
             colorSquare.classList.add('retrieved-palette-color-square');
+            colorSquare.classList.add('col-1');
             colorSquare.style.backgroundColor = colorObjectToRGB(color);
             palettePreview.appendChild(colorSquare);
           });
@@ -289,7 +298,7 @@ function getPaletteMessageListener(response) {
     // show the form to submit palette
     document.querySelector('#submit-palette-form').style.display = 'block';
     document.querySelector('#submit-palette').addEventListener('click', (e) => handleSubmitPalette(e, url));
-    displaySucessMessage('Retrieved website palette');
+    displaySuccessMessage('Retrieved website palette');
   } else {
     displayFailMessage(`Error: ${response.message}`);
   }
