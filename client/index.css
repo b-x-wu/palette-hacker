@@ -1,3 +1,43 @@
+body {
+    width: 400px;
+    height: 300px;
+}
+
+#header {
+    text-align: center;
+}
+
+#header h1 {
+    margin: 10px;
+    display: inline-block;
+}
+
+#header .message-display {
+    padding: 10px;
+}
+
+#message-displays {
+    margin: 0 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.swatch {
+    width: 20vw;
+    height: 20vw;
+    margin: calc(40px/6);
+}
+
+#swatches {
+    margin-left: calc(80px/6);
+}
+
+#swatches-container {
+    margin: 10px 0px;
+}
+
 #success-display {
     background-color: lightgreen;
 }
@@ -18,4 +58,9 @@
 
 .retrieved-palette {
     outline: auto;
+}
+
+.container {
+    padding-left: 20px;
+    padding-right: 20px;
 }

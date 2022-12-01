@@ -4,21 +4,38 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="index.css">
 </head>
-<body>
+<body class="bg-dark">
     <script defer src="index.js"></script>
-    <h1>Palette Hacker</h1>
-    <div id="message-displays">
-        <div id="success-display"></div>
-        <div id="fail-display"></div>
-        <div id="loading-display"></div>
+    <div id="header">
+        <h1 class="text-light">Palette Hacker</h1>
+        <div id="message-displays">
+            <div id="success-display" class="message-display hidden font-weight-bold alert"></div>
+            <div id="fail-display" class="message-display hidden font-weight-bold alert"></div>
+            <div id="loading-display" class="message-display hidden font-weight-bold alert"></div>
+        </div>
     </div>
-    <div id="swatches"></div>
-    <form id="submit-palette-form">
-        <input type="text" id="palette-name" placeholder="Palette Name">
-        <button type="submit" id="submit-palette">Submit Palette</button>
-    </form>
+    <div id="swatches-container">
+        <div id="swatches" class="row g-0"></div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <form id="submit-palette-form">
+                    <div class="row">
+                        <div class="col-8">
+                            <input type="text" id="palette-name" class="form-control mb-2 mr-sm-2" placeholder="Palette Name">
+                        </div>
+                        <div class="col-4 text-right">
+                            <button type="submit" id="submit-palette" class="btn btn-light">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <div id="retrieved-palettes">
         <template id="retrieved-palette-template">
             <div class="retrieved-palette">

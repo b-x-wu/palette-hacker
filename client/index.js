@@ -1,5 +1,5 @@
-// const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
-const baseEndpoint = 'https://palette-hacker.herokuapp.com';
+const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
+// const baseEndpoint = 'https://palette-hacker.herokuapp.com';
 const successDisplay = document.querySelector('#success-display');
 const failDisplay = document.querySelector('#fail-display');
 const loadingDisplay = document.querySelector('#loading-display');
@@ -35,8 +35,9 @@ function colorObjectToRGB(colorObj) {
  * @param {string} message the failure message to display
  */
 function displayFailMessage(message) {
-  loadingDisplay.textContent = '';
-  successDisplay.textContent = '';
+  loadingDisplay.classList.add('hidden');
+  successDisplay.classList.add('hidden');
+  failDisplay.classList.remove('hidden');
   failDisplay.textContent = message;
 }
 
@@ -45,8 +46,9 @@ function displayFailMessage(message) {
  * @param {string} message the success message to display
  */
 function displaySucessMessage(message) {
-  loadingDisplay.textContent = '';
-  failDisplay.textContent = '';
+  loadingDisplay.classList.add('hidden');
+  failDisplay.classList.add('hidden');
+  successDisplay.classList.remove('hidden');
   successDisplay.textContent = message;
 }
 
@@ -55,18 +57,11 @@ function displaySucessMessage(message) {
  * @param {string} message the message to display
  */
 function displayLoadingMessage(message) {
-  successDisplay.textContent = '';
+  successDisplay.classList.add('hidden');
+  failDisplay.classList.add('hidden');
+  loadingDisplay.classList.remove('hidden');
   loadingDisplay.textContent = message;
-  failDisplay.textContent = '';
 }
-
-/**
- * Clears the message display divs
- */
-// function clearMessageDisplays() {
-//   failDisplay.textContent = '';
-//   successDisplay.textContent = '';
-// }
 
 // ----------------------- EVENT LISTENERS ----------------------------
 
@@ -111,6 +106,7 @@ function handleSubmitPalette(e, url) {
 
     // get name and website
     const paletteName = document.querySelector('#palette-name').value;
+    document.querySelector('#palette-name').value = '';
     // TODO: figure out what we want for the website.
 
     // retrieving the palette from content.js
@@ -278,9 +274,11 @@ function getPaletteMessageListener(response) {
 
     // TODO: how much of the palette do we actually want to save? right now it's all of it
 
-    const abridgedPalette = palette.slice(0, 10);
+    const abridgedPalette = palette.slice(0, 8);
     abridgedPalette.forEach((color) => {
       const swatch = document.createElement('input');
+      swatch.classList.add('swatch');
+      // swatch.classList.add('col-md-2');
       swatch.type = 'color';
       swatch.value = rgbaToHex(`rgb(${color.color.red}, ${color.color.green}, ${color.color.blue})`);
       swatch.addEventListener('input', (e) => handleColorInput(e, color.components));
