@@ -6,6 +6,16 @@ It's often the case when browsing the web that the color palette of a site is no
 
 Whatever the reason may be, Palette Hacker is a Chrome extension that allows you to modify the colors used in the CSS of a webpage. Color palette adjustments stay with the user, even if they leave and come back to a page. Users also have the option to submit the palette's they've made so other users can use the palette's they've created.
 
+## Runbook
+
+While this extension is not available on the Chrome Web store, the only way to run it is to deploy it locally to your own Chrome browser. Here are in the instructions to do so. You will still have accesses to the public database and endpoints as those are fully deployed.
+
+1. `git clone` this project.
+2. Navigate to [chrome://extensions/](chrome://extensions/) in Google Chrome
+3. Click the 'Load Unpacked' button in the top left corner.
+4. Navigate to the project's 'client' folder and select it.
+5. Be sure that the extension is pinned in your extension manager in the top right corner of your broswer.
+
 ## Data Model
 
 The application will store Users and Palettes.
