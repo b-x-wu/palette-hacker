@@ -222,6 +222,7 @@ async function handleApplyPalette(event, id) {
 
 async function handleRetrieveWebsitePalettes() {
   // get the url of the page
+  displayLoadingMessage('Retrieving website palettes.');
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const message = {
       author: 'popup',
@@ -239,6 +240,10 @@ async function handleRetrieveWebsitePalettes() {
 
       if (fetchResponse.status === 200) {
         const { palettes } = fetchResponseBody.data;
+        if (palettes.length === 0) {
+          displayFailMessage('There are no palettes available for this website.');
+          return;
+        }
         const retrievedPalettesContainer = document.querySelector('#retrieved-palettes');
         const retrievedPaletteTemplate = document.querySelector('#retrieved-palette-template');
 
@@ -272,6 +277,7 @@ async function handleRetrieveWebsitePalettes() {
           retrievedPalettesContainer.appendChild(retrievedPalette);
         });
         document.querySelector('#retrieved-palettes').classList.remove('hidden');
+        displaySuccessMessage('Retrieved website palettes.');
       } else if (fetchResponse.status === 400) {
         displayFailMessage(`Error retrieving palettes: ${fetchResponseBody.data.reason}`);
       } else if (fetchResponse.status === 500) {
@@ -286,6 +292,7 @@ async function handleRetrieveWebsitePalettes() {
 async function handleRetrieveUserPalettes() {
   // get the url of the page
   useUserId((userId) => {
+    displayLoadingMessage('Retrieving your palettes.');
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       const message = {
         author: 'popup',
@@ -304,6 +311,10 @@ async function handleRetrieveUserPalettes() {
 
         if (fetchResponse.status === 200) {
           const { palettes } = fetchResponseBody.data;
+          if (palettes.length === 0) {
+            displayFailMessage('You have no palettes for this website.');
+            return;
+          }
           const retrievedPalettesContainer = document.querySelector('#retrieved-user-palettes');
           const retrievedPaletteTemplate = document.querySelector('#retrieved-palette-template');
 
@@ -337,6 +348,7 @@ async function handleRetrieveUserPalettes() {
             retrievedPalettesContainer.appendChild(retrievedPalette);
           });
           retrievedPalettesContainer.classList.remove('hidden');
+          displaySuccessMessage('Retrieved your palettes.');
         } else if (fetchResponse.status === 400) {
           displayFailMessage(`Error retrieving palettes: ${fetchResponseBody.data.reason}`);
         } else if (fetchResponse.status === 500) {
@@ -403,9 +415,9 @@ function getPaletteMessageListener(response) {
 
 function main() {
   document.querySelector('#submit-palette-form').style.display = 'none';
-  handleRetrieveWebsitePalettes();
-  handleRetrieveUserPalettes();
   handleGetPalette();
+  document.querySelector('#btn-get-user-palettes').addEventListener('click', handleRetrieveUserPalettes);
+  document.querySelector('#btn-get-website-palettes').addEventListener('click', handleRetrieveWebsitePalettes);
 }
 
 document.addEventListener('DOMContentLoaded', main);
