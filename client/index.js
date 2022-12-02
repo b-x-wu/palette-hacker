@@ -324,9 +324,11 @@ async function handleRetrieveUserPalettes() {
           const retrievedPalettesContainer = document.querySelector('#retrieved-user-palettes');
           const retrievedPaletteTemplate = document.querySelector('#retrieved-palette-template');
 
-          const maxRelevance = palettes.reduce((previousMax, currentPalette) => (
-            currentPalette.relevance > previousMax ? currentPalette.relevance : previousMax
-          ), -1);
+          const cleanUrl = (funcUrl) => funcUrl.split('#')[0] // get everything before the hash if it exists
+            .split('?')[0] // get everything before the question mark if it exists
+            .replace(/\/+$/, '');
+
+          const maxRelevance = cleanUrl(url).split('/').length;
 
           palettes.forEach((palette) => {
             console.log(palette);
