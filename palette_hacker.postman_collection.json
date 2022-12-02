@@ -1,0 +1,308 @@
+{
+	"info": {
+		"_postman_id": "43b9d95e-0787-4f03-a330-95d340182ddb",
+		"name": "Palette Hacker",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24275654"
+	},
+	"item": [
+		{
+			"name": "Prod",
+			"item": [
+				{
+					"name": "Sample get palette Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://palette-hacker.herokuapp.com/get_palette?objectId=6377c557e3a0a635a7c39e2c",
+							"protocol": "https",
+							"host": [
+								"palette-hacker",
+								"herokuapp",
+								"com"
+							],
+							"path": [
+								"get_palette"
+							],
+							"query": [
+								{
+									"key": "objectId",
+									"value": "nonsense",
+									"description": "Improperly formatted",
+									"disabled": true
+								},
+								{
+									"key": "objectId",
+									"value": "6377c557e3a0a635a7c3123c",
+									"description": "Id does not exist",
+									"disabled": true
+								},
+								{
+									"key": "objectId",
+									"value": "6377c557e3a0a635a7c39e2c",
+									"description": "Valid id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sample get website palettes own Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://palette-hacker.herokuapp.com/get_website_palettes/own?website=https://mongoosejs.com/docs/typescript.html&userId=5fd9129ed799eef5f18d01da404cb657a1c414c73344995a05e885133c398",
+							"protocol": "https",
+							"host": [
+								"palette-hacker",
+								"herokuapp",
+								"com"
+							],
+							"path": [
+								"get_website_palettes",
+								"own"
+							],
+							"query": [
+								{
+									"key": "website",
+									"value": "https://mongoosejs.com/docs/typescript.html"
+								},
+								{
+									"key": "userId",
+									"value": "5fd9129ed799eef5f18d01da404cb657a1c414c73344995a05e885133c398"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sample get website palettes Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://palette-hacker.herokuapp.com/get_website_palettes?website=https://mongoosejs.com/docs/typescript.html",
+							"protocol": "https",
+							"host": [
+								"palette-hacker",
+								"herokuapp",
+								"com"
+							],
+							"path": [
+								"get_website_palettes"
+							],
+							"query": [
+								{
+									"key": "website",
+									"value": "https://mongoosejs.com/docs/typescript.html"
+								},
+								{
+									"key": "website",
+									"value": "https://mongoosejs.com/docs",
+									"disabled": true
+								},
+								{
+									"key": "website",
+									"value": "https://mongoosejs.com",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sample post palette Copy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Sample Palette\",\r\n    \"website\": \"https://samplewebsite.com\",\r\n    \"userId\": \"randomUserId\",\r\n    \"palette\": [\r\n        {\r\n            \"color\": {\r\n                \"red\": 100,\r\n                \"green\": 100,\r\n                \"blue\": 100\r\n            },\r\n            \"components\": [\r\n                {\r\n                    \"selector\": \"body>div\",\r\n                    \"attribute\": \"background-color\"\r\n                }\r\n            ]\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://palette-hacker.herokuapp.com/add_palette",
+							"protocol": "https",
+							"host": [
+								"palette-hacker",
+								"herokuapp",
+								"com"
+							],
+							"path": [
+								"add_palette"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dev",
+			"item": [
+				{
+					"name": "Sample post palette",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Sample Palette\",\r\n    \"website\": \"https://samplewebsite.com\",\r\n    \"userId\": \"randomUserId\",\r\n    \"palette\": [\r\n        {\r\n            \"color\": {\r\n                \"red\": 100,\r\n                \"green\": 100,\r\n                \"blue\": 100\r\n            },\r\n            \"components\": [\r\n                {\r\n                    \"selector\": \"body>div\",\r\n                    \"attribute\": \"background-color\"\r\n                }\r\n            ]\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/add_palette",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"add_palette"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sample get website palettes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/get_website_palettes?website=https://mongoosejs.com/docs/typescript.html",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"get_website_palettes"
+							],
+							"query": [
+								{
+									"key": "website",
+									"value": "https://mongoosejs.com/docs/typescript.html"
+								},
+								{
+									"key": "website",
+									"value": "https://mongoosejs.com/docs",
+									"disabled": true
+								},
+								{
+									"key": "website",
+									"value": "https://mongoosejs.com",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sample get website palettes own",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/get_website_palettes/own?website=https://mongoosejs.com/docs/typescript.html&userId=5fd9129ed799eef5f18d01da404cb657a1c414c73344995a05e885133c398",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"get_website_palettes",
+								"own"
+							],
+							"query": [
+								{
+									"key": "website",
+									"value": "https://mongoosejs.com/docs/typescript.html"
+								},
+								{
+									"key": "userId",
+									"value": "5fd9129ed799eef5f18d01da404cb657a1c414c73344995a05e885133c398"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sample get palette",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/get_palette?objectId=6377c557e3a0a635a7c39e2c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"get_palette"
+							],
+							"query": [
+								{
+									"key": "objectId",
+									"value": "nonsense",
+									"description": "Improperly formatted",
+									"disabled": true
+								},
+								{
+									"key": "objectId",
+									"value": "6377c557e3a0a635a7c3123c",
+									"description": "Id does not exist",
+									"disabled": true
+								},
+								{
+									"key": "objectId",
+									"value": "6377c557e3a0a635a7c39e2c",
+									"description": "Valid id"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

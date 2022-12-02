@@ -8,19 +8,16 @@ Whatever the reason may be, Palette Hacker is a Chrome extension that allows you
 
 ## Data Model
 
-The application will store Users, Websites, and Palettes.
+The application will store Users and Palettes.
 
-* Users can have multiple Palettes (via references)
-* Websites can have multiple Palettes (via references)
-* Palettes can only belong to a single user and a single website (via references) and contain many Swaps (via embedding)
-* Swaps (representing a single color change) are contained in Palettes
+* Users are identified by a unique userId generated and stored with Chrome. Each user can have many palette (references)
+* Each palette contains information about the website, the swatches on the website, and the components and attributes those swatches apply to
 
 An Example User:
 
 ```javascript
 {
-  username: "westingben",
-  hash: "afu829rfids903rjaf0", // a password hash
+  userId: "ajfo932jfjfjzoifjzlkj3",
   palettes: [ // an array of references to Palette documents
     ObjectId(1249008104),
     ObjectId(0514958129)
@@ -32,7 +29,6 @@ An Example Palette:
 
 ```javascript
 {
-  user: ObjectId(1037141147), // a reference to a User document
   website: "https://samplewebsite.com",
   name: "Dark Mode",
   palette: [
@@ -53,9 +49,9 @@ An Example Palette:
 }
 ```
 
-## [Link to Commented First Draft Schema](./src/db.ts)
+## [Link to Schema](./src/db.ts)
 
-## Wireframes
+## Initial Wireframes
 
 / - page to modify the current palette
 
@@ -85,7 +81,7 @@ An Example Palette:
 
 ![update palette](./documentation/update_palette.png)
 
-## Site map
+## Initial Site map
 
 ![site map](./documentation/sitemap.png)
 
@@ -108,15 +104,20 @@ An Example Palette:
 
 ## Research Topics
 
-* (6 points) Chrome extensions
+* (5 points) Chrome extensions
   * Ultimately, my web app will be a Google Chrome extension. This comes with its own API and a required Manifest doc to be written.
   * I have little to no experience in this area, and I expect it to be a bit of a learning curve.
-* (2 points) Postman
+  * To split it up, I would say writing the Manifest could be 2 points, setting up the content script listening was 3 points.
+* (1 point) Postman
   * I've been making calls through Postman and have created a host of request types in a Postman project
   * I have next to no experience in Postman projects.
-* (2 point) TypeScript
+  * I've provided my Postman collection [here](palette_hacker.postman_collection.json)
+* (2 point) Bootstrap
+  * I have little experience with Bootstrap to style, but the experience was made slightly easier by the fact that my viewport is fixed.
+  * Even still, styling took me more time than anticipated.
+* (2 points) TypeScript
   * Using TypeScript to try my best to avoid `undefined` or `null` type errors.
-  * I have some experience with TypeScript with React.
+  * I have some experience with TypeScript, but I've never had to set up the [tsconfig](tsconfig.json) or [nodemon config](nodemon.json) by hand before
 
 ## [Link to Initial Main Project File](./src/app.ts)
 
@@ -127,3 +128,4 @@ An Example Palette:
 1. [How To Set Up a Node Project With Typescript - Digital Ocean](https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript)
 2. [Reading time - Chrome Developers](https://developer.chrome.com/docs/extensions/mv3/getstarted/tut-reading-time/)
 3. [Methods to get unique values from arrays in Javascript and their performance - Phi Bya](https://dev.to/phibya/methods-to-get-unique-values-from-arrays-in-javascript-and-their-performance-1da8)
+4. [Getting Unique ClientId from Chrome Extension - Rob W](https://stackoverflow.com/questions/23822170/getting-unique-clientid-from-chrome-extension)
