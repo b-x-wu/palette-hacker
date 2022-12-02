@@ -1,5 +1,5 @@
-const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
-// const baseEndpoint = 'https://palette-hacker.herokuapp.com';
+// const baseEndpoint = 'http://localhost:3001'; // TODO: set this programatically
+const baseEndpoint = 'https://palette-hacker.herokuapp.com';
 const successDisplay = document.querySelector('#success-display');
 const failDisplay = document.querySelector('#fail-display');
 const loadingDisplay = document.querySelector('#loading-display');
@@ -223,6 +223,8 @@ async function handleApplyPalette(event, id) {
 async function handleRetrieveWebsitePalettes() {
   // get the url of the page
   displayLoadingMessage('Retrieving website palettes.');
+  document.querySelector('#retrieved-palettes').classList.add('hidden');
+  document.querySelector('#retrieved-user-palettes').classList.add('hidden');
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const message = {
       author: 'popup',
@@ -292,6 +294,8 @@ async function handleRetrieveWebsitePalettes() {
 async function handleRetrieveUserPalettes() {
   // get the url of the page
   useUserId((userId) => {
+    document.querySelector('#retrieved-palettes').classList.add('hidden');
+    document.querySelector('#retrieved-user-palettes').classList.add('hidden');
     displayLoadingMessage('Retrieving your palettes.');
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       const message = {
