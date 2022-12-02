@@ -11,7 +11,10 @@ const UserSchema = new Schema<User>({
     type: String,
     required: true,
   },
-  palettes: [Types.ObjectId],
+  palettes: {
+    type: [Types.ObjectId],
+    default: [],
+  },
 });
 
 const PaletteSchema = new Schema<Palette>({

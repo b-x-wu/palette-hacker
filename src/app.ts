@@ -2,12 +2,13 @@ import express, { Application } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import './db';
-import { Palette } from './types';
+import { Palette, User } from './types';
 
 const app: Application = express();
 const port = process.env.PORT || 3001;
 
 const PaletteModel = mongoose.model<Palette>('Palette');
+const UserModel = mongoose.model<User>('User');
 
 // returns the url sans query params, fragment, or trailing slashes
 const cleanUrl = (url: string) => url.split('#')[0] // get everything before the hash if it exists
@@ -45,7 +46,9 @@ app.post('/add_palette', (req, res) => {
   }
 
   // get website attributes
-  const { name, website, palette } = req.body;
+  const {
+    name, website, palette, userId,
+  } = req.body;
 
   // create and save palette document
   const newPalette = new PaletteModel({
@@ -54,20 +57,47 @@ app.post('/add_palette', (req, res) => {
     palette,
   });
 
-  newPalette.save().then(() => {
-    console.log(`New palette ${name} created and saved.`);
-    res.json({
-      status: 'success',
-      data: null,
+  newPalette.save()
+    .then((doc) => {
+      console.log(`New palette ${doc.name} created and saved.`);
+      return doc;
+    })
+    .then((paletteDoc) => {
+      if (!userId) {
+        console.log('No userId');
+        return {};
+      }
+      const options = {
+        upsert: true, new: true, setDefaultsOnInsert: true,
+      };
+      const update = {
+        $setOnInsert: { id: userId },
+        $push: { palettes: paletteDoc.id },
+      };
+
+      return UserModel.findOneAndUpdate({ id: userId }, update, options)
+        .then((doc) => {
+          if (!doc) {
+            console.log('Error saving to user');
+            return;
+          }
+          console.log(`Palette saved for ${doc?.id}.`);
+        });
+    })
+    .then(() => {
+      res.json({
+        status: 'success',
+        data: null,
+      });
+    })
+    .catch((err) => {
+      console.log(err.message);
+      res.status(500);
+      res.json({
+        status: 'error',
+        message: 'Unknown database error.',
+      });
     });
-  }, (err) => {
-    console.log(err.message);
-    res.status(500);
-    res.json({
-      status: 'error',
-      message: 'Unknown database error.',
-    });
-  });
 });
 
 app.get('/get_website_palettes', (req, res) => {
