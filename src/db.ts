@@ -7,18 +7,18 @@ dotenv.config();
 const { Schema } = mongoose;
 
 const UserSchema = new Schema<User>({
-  id: {
+  userId: {
     type: String,
     required: true,
   },
   palettes: {
     type: [Types.ObjectId],
     default: [],
+    ref: 'Palette',
   },
 });
 
 const PaletteSchema = new Schema<Palette>({
-  user: Types.ObjectId,
   website: {
     type: String,
     required: true,

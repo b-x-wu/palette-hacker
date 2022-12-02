@@ -1,3 +1,4 @@
+/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
 import express, { Application } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -75,19 +76,92 @@ app.post('/add_palette', (req, res) => {
         $push: { palettes: paletteDoc.id },
       };
 
-      return UserModel.findOneAndUpdate({ id: userId }, update, options)
+      return UserModel.findOneAndUpdate({ userId }, update, options)
         .then((doc) => {
           if (!doc) {
             console.log('Error saving to user');
             return;
           }
-          console.log(`Palette saved for ${doc?.id}.`);
+          console.log(`Palette saved for ${doc?.userId}.`);
         });
     })
     .then(() => {
       res.json({
         status: 'success',
         data: null,
+      });
+    })
+    .catch((err) => {
+      console.log(err.message);
+      res.status(500);
+      res.json({
+        status: 'error',
+        message: 'Unknown database error.',
+      });
+    });
+});
+
+app.get('/get_website_palettes/own', (req, res) => {
+  // provides query params website or user
+  if (!req.query.website) {
+    res.status(400);
+    res.json({
+      status: 'fail',
+      data: {
+        reason: 'No website provided',
+      },
+    });
+    return;
+  }
+
+  if (!req.query.userId) {
+    res.status(400);
+    res.json({
+      status: 'fail',
+      data: {
+        reason: 'No userId provided',
+      },
+    });
+    return;
+  }
+
+  UserModel.findOne({
+    userId: req.query.userId,
+  })
+    .populate<{ palettes: Palette[] }>('palettes')
+    .then((userDoc) => {
+      res.json({
+        status: 'success',
+        data: {
+          palettes: userDoc?.palettes.filter((palette) => {
+            const dbPaths = palette.website.split('/');
+            const currentWebsitePaths = cleanUrl(req.query.website as string).split('/');
+
+            if (dbPaths.length > currentWebsitePaths.length) {
+              return false;
+            }
+
+            for (let i = 0; i < dbPaths.length; i++) {
+              if (dbPaths[i] !== currentWebsitePaths[i]) {
+                return false;
+              }
+            }
+
+            return true;
+          })
+            .map((doc) => {
+            // add a relevance field
+              const relevance = doc.website.split('/').length;
+              return {
+                objectId: doc._id,
+                name: doc.name,
+                website: doc.website,
+                colors: doc.palette.map((swatch) => swatch.color),
+                relevance,
+              };
+            })
+            .sort((doc1, doc2) => doc2.relevance - doc1.relevance),
+        },
       });
     })
     .catch((err) => {

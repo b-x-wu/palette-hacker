@@ -2,7 +2,8 @@ import { Types } from 'mongoose';
 // moves these to @types directory
 
 export interface User {
-    id: string;
+    _id: Types.ObjectId;
+    userId: string;
     palettes: Types.ObjectId[];
 }
 
@@ -23,7 +24,7 @@ interface Swatch {
 }
 
 export interface Palette {
-    user: Types.ObjectId;
+    _id: Types.ObjectId;
     website: string;
     name: string;
     palette: Swatch[]
