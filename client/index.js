@@ -7,6 +7,19 @@ const swatchContainer = document.querySelector('#swatches');
 
 // ----------------------- UTILITY FUNCTIONS ----------------------------
 
+// taken from https://stackoverflow.com/questions/23822170/getting-unique-clientid-from-chrome-extension
+function getRandomToken() {
+  // E.g. 8 * 32 = 256 bits token
+  const randomPool = new Uint8Array(32);
+  crypto.getRandomValues(randomPool);
+  let hex = '';
+  for (let i = 0; i < randomPool.length; ++i) {
+    hex += randomPool[i].toString(16);
+  }
+  // E.g. db18458e2782b2b77e36769c569e263a53885a9944dd0a861e5064eac16f1a
+  return hex;
+}
+
 /**
  * Converts a string from rgba(*, *, *, *) to hex (#******)
  * @param {String} rgba the rgba string to convert to hex
@@ -107,38 +120,40 @@ function handleSubmitPalette(e, url) {
     // get name and website
     const paletteName = document.querySelector('#palette-name').value;
     document.querySelector('#palette-name').value = '';
-    // TODO: figure out what we want for the website.
 
     // retrieving the palette from content.js
-    chrome.tabs.sendMessage(tabs[0].id, message, async (chromeResponse) => {
-      if (chromeResponse.status === 'success') {
-        const { palette } = chromeResponse.data;
+    useUserId((userId) => {
+      chrome.tabs.sendMessage(tabs[0].id, message, async (chromeResponse) => {
+        if (chromeResponse.status === 'success') {
+          const { palette } = chromeResponse.data;
 
-        // send the palette to api
-        const rawAPIResponse = await fetch(`${baseEndpoint}/add_palette`, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            palette,
-            name: paletteName,
-            website: url,
-          }),
-        });
-        const apiResponse = await rawAPIResponse.json();
+          // send the palette to api
+          const rawAPIResponse = await fetch(`${baseEndpoint}/add_palette`, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId,
+              palette,
+              name: paletteName,
+              website: url,
+            }),
+          });
+          const apiResponse = await rawAPIResponse.json();
 
-        // send message out to user
-        if (apiResponse.status === 'success') {
-          displaySuccessMessage('Successfully submitted palette.');
-          console.log(apiResponse.data);
-        } else if (apiResponse.status === 'error') {
-          displayFailMessage(`Error: ${apiResponse.message}`);
+          // send message out to user
+          if (apiResponse.status === 'success') {
+            displaySuccessMessage('Successfully submitted palette.');
+            console.log(apiResponse.data);
+          } else if (apiResponse.status === 'error') {
+            displayFailMessage(`Error: ${apiResponse.message}`);
+          }
+        } else {
+          displayFailMessage(`Error: ${chromeResponse.message}`);
         }
-      } else {
-        displayFailMessage(`Error: ${chromeResponse.message}`);
-      }
+      });
     });
   });
 }
@@ -268,6 +283,21 @@ async function handleRetrieveWebsitePalettes() {
 }
 
 // ----------------------- CHROME MESSAGE LISTENERS --------------------------
+
+// taken from https://stackoverflow.com/questions/23822170/getting-unique-clientid-from-chrome-extension
+function useUserId(useToken) {
+  chrome.storage.sync.get('userid', (items) => {
+    let { userid } = items;
+    if (userid) {
+      useToken(userid);
+    } else {
+      userid = getRandomToken();
+      chrome.storage.sync.set({ userid }, () => {
+        useToken(userid);
+      });
+    }
+  });
+}
 
 function getPaletteMessageListener(response) {
   if (response.status === 'success') {

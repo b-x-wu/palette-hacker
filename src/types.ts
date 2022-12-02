@@ -2,8 +2,7 @@ import { Types } from 'mongoose';
 // moves these to @types directory
 
 export interface User {
-    username: string;
-    hash: string;
+    id: string;
     palettes: Types.ObjectId[];
 }
 

@@ -7,11 +7,7 @@ dotenv.config();
 const { Schema } = mongoose;
 
 const UserSchema = new Schema<User>({
-  username: {
-    type: String,
-    required: true,
-  },
-  hash: {
+  id: {
     type: String,
     required: true,
   },

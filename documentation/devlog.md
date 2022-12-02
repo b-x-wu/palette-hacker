@@ -132,3 +132,11 @@ This is a proof of concept now, which is nice. There's a few things to definitel
 ## 11/29/22 11:59 PM
 
 It's after Thanksgiving break, and I spent a good bit of time messing around with Webpack in a different branch, but now we're a few days from the due date. This means that I need to pick and choose what I actually want to do. First things first, I need to remove the login capability. Next, I need to apply some styles. I think I'm going to use Bootstrap for pretty.
+
+## 12/1/22 6:23 PM
+
+Ok so the project is due tomorrow, and I have two huge problems to overcome still. First, I need another database schema. I think I'm going to pull through on sessions. In this case, I'll have a user that has an id, the persistant session id, and a list of palettes (probably in palette ids) that have been created with this session. When a user opens up the extension on a webpage, we will query the user's palettes and pull out palettes that they have made for that *exact* page (not concerning relevance).
+
+## 12/1/22 11:21 PM
+
+It's not going to work if I use the session, so new idea. I'm going to generate a new token from chrome and store it in the chrome storange. That should keep for the lifetime of the extension. That's going to become the unique use id in the database that's stored in the schema. I'm using the code provided in [this](https://stackoverflow.com/questions/23822170/getting-unique-clientid-from-chrome-extension) Stack Overflow response.
