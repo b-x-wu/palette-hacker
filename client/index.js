@@ -271,6 +271,7 @@ async function handleRetrieveWebsitePalettes() {
 
           retrievedPalettesContainer.appendChild(retrievedPalette);
         });
+        document.querySelector('#retrieved-palettes').classList.remove('hidden');
       } else if (fetchResponse.status === 400) {
         displayFailMessage(`Error retrieving palettes: ${fetchResponseBody.data.reason}`);
       } else if (fetchResponse.status === 500) {
@@ -279,6 +280,72 @@ async function handleRetrieveWebsitePalettes() {
     } catch (e) {
       displayFailMessage(`Error retrieving palettes: ${e.message}`);
     }
+  });
+}
+
+async function handleRetrieveUserPalettes() {
+  // get the url of the page
+  useUserId((userId) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      const message = {
+        author: 'popup',
+        request: 'getUrl',
+      };
+      try {
+        const chromeResponse = await chrome.tabs.sendMessage(tabs[0].id, message);
+        const { url } = chromeResponse.data;
+
+        const fetchResponse = await fetch(`${baseEndpoint}/get_website_palettes/own?${new URLSearchParams({
+          website: url,
+          userId,
+        })}`);
+
+        const fetchResponseBody = await fetchResponse.json();
+
+        if (fetchResponse.status === 200) {
+          const { palettes } = fetchResponseBody.data;
+          const retrievedPalettesContainer = document.querySelector('#retrieved-user-palettes');
+          const retrievedPaletteTemplate = document.querySelector('#retrieved-palette-template');
+
+          const maxRelevance = palettes.reduce((previousMax, currentPalette) => (
+            currentPalette.relevance > previousMax ? currentPalette.relevance : previousMax
+          ), -1);
+
+          palettes.forEach((palette) => {
+            console.log(palette);
+            const retrievedPalette = retrievedPaletteTemplate.content.cloneNode(true);
+            retrievedPalette.querySelector('.palette-name').textContent = palette.name;
+            const relevancePercentage = palette.relevance / maxRelevance;
+            retrievedPalette.querySelector('.palette-relevance').textContent = `Relevance: ${Number(relevancePercentage).toLocaleString(
+              undefined,
+              {
+                style: 'percent', minimumFractionDigits: 2,
+              },
+            )}`;
+            retrievedPalette.querySelector('.palette-relevance').style.color = `rgb(${255 - 255 * relevancePercentage}, ${255 * relevancePercentage}, 100)`;
+            retrievedPalette.querySelector('.apply-palette').addEventListener('click', (e) => handleApplyPalette(e, palette.objectId));
+
+            const palettePreview = retrievedPalette.querySelector('.palette-preview');
+            palette.colors.slice(0, 5).forEach((color) => {
+              const colorSquare = document.createElement('div');
+              colorSquare.classList.add('retrieved-palette-color-square');
+              colorSquare.classList.add('col-1');
+              colorSquare.style.backgroundColor = colorObjectToRGB(color);
+              palettePreview.appendChild(colorSquare);
+            });
+
+            retrievedPalettesContainer.appendChild(retrievedPalette);
+          });
+          retrievedPalettesContainer.classList.remove('hidden');
+        } else if (fetchResponse.status === 400) {
+          displayFailMessage(`Error retrieving palettes: ${fetchResponseBody.data.reason}`);
+        } else if (fetchResponse.status === 500) {
+          displayFailMessage(`Error retrieving palettes: ${fetchResponseBody.message}`);
+        }
+      } catch (e) {
+        displayFailMessage(`Error retrieving palettes: ${e.message}`);
+      }
+    });
   });
 }
 
@@ -301,8 +368,6 @@ function useUserId(useToken) {
 
 function getPaletteMessageListener(response) {
   if (response.status === 'success') {
-    // display the color palette out to the user
-    // we probably don't want to display all the colors, maybe the most popular ones
     const { palette, url } = response.data;
     console.log(palette);
     palette.sort((color1, color2) => color2.components.length - color1.components.length);
@@ -339,6 +404,7 @@ function getPaletteMessageListener(response) {
 function main() {
   document.querySelector('#submit-palette-form').style.display = 'none';
   handleRetrieveWebsitePalettes();
+  handleRetrieveUserPalettes();
   handleGetPalette();
 }
 
